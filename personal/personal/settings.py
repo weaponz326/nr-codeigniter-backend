@@ -50,13 +50,18 @@ INSTALLED_APPS = [
     'rest_auth.registration',
 
     'users',
+    'module_calendar',
+    'module_budget',
+    'module_notes',
+    'module_accounts',
+    'module_tasks',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -138,6 +143,7 @@ STATIC_URL = '/static/'
 # cors settings
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 
 #rest framework settings
@@ -168,5 +174,3 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 # remove for production
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-

@@ -25,4 +25,9 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 
     path('users/', include('users.urls')),
+    path('module-calendar/', include('module_calendar.urls')),
+    path('module-notes/', include('module_notes.urls')),
+    path('module-accounts/', include('module_accounts.urls')),
+    path('module-budget/', include('module_budget.urls')),
+    path('module-tasks/', include('module_tasks.urls')),
 ]

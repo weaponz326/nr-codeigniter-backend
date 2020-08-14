@@ -18,24 +18,27 @@ class ProfileView(viewsets.ModelViewSet):
 
 # creates a new hospital profile and add creator to personal users
 class NewProfileView(APIView):
-    def post(self, request, *args, **kwargs):
-        profile = Profile(
-            name=request.data.get("name"),
-            location=request.data.get("location"),
-            about=request.data.get("about")
-        )
-        profile.save()
+    serializer = ProfileSerializer
 
-        # personal users in admin module
-        user = User(
-            personal_id=request.data.get("personal_id"),
-            account=Profile.objects.latest("id"),
-            is_creator=True,
-            is_admin=True
-        )
-        user.save()
+    if serializer.is_valid():
+        def post(self, request, *args, **kwargs):
+            profile = Profile(
+                name=request.data.get("name"),
+                location=request.data.get("location"),
+                about=request.data.get("about")
+            )
+            profile.save()
 
-        return Response({'status': True})
+            # personal users in admin module
+            user = User(
+                personal_id=request.data.get("personal_id"),
+                account=Profile.objects.latest("id"),
+                is_creator=True,
+                is_admin=True
+            )
+            user.save()
+
+            return Response({'status': True})
 
 # checks if user has a hospital acount
 class HasAccountView(APIView):
