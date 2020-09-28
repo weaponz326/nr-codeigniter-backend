@@ -16,7 +16,7 @@ class ProfileStoreSerializer(serializers.Serializer):
         instance.about = validated_data.get('about', instance.about)
         return instance
 
-# user serializer is joined with rpofile serializer
+# user serializer is joined with profile serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

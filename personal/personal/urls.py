@@ -30,4 +30,5 @@ urlpatterns = [
     path('module-accounts/', include('module_accounts.urls')),
     path('module-budget/', include('module_budget.urls')),
     path('module-tasks/', include('module_tasks.urls')),
+    path('module-portal/', include('module_portal.urls')),
 ]

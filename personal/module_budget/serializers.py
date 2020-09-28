@@ -4,7 +4,7 @@ from .models import Budget, Income, Expenditure
 class BudgetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Budget
-        fields = ['id', 'user', 'budget_name', 'budget_type', 'created_at', 'updated_at']
+        fields = ['id', 'user', 'budget_name', 'budget_type', 'created_at']
 
 class IncomeSerializer(serializers.ModelSerializer):
     class Meta:

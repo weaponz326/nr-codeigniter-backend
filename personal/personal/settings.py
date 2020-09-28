@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'module_notes',
     'module_accounts',
     'module_tasks',
+    'module_portal',
+    'module_settings',
 ]
 
 MIDDLEWARE = [
@@ -129,7 +131,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -139,6 +141,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
+# change default date time format
+DATETIME_FORMAT = 'Y-m-d H:M:S'
 
 # cors settings
 

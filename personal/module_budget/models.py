@@ -9,7 +9,6 @@ class Budget(models.Model):
     budget_name = models.CharField(max_length=100, null=True)
     budget_type = models.CharField(max_length=50, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
