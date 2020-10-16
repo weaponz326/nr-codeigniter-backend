@@ -130,6 +130,7 @@ STATIC_URL = '/static/'
 # cors settings
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 
 #rest framework settings

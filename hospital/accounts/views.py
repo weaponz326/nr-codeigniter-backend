@@ -53,7 +53,7 @@ class HasAccountView(APIView):
 class ActiveAccountView(APIView):
     def post(self, request, *args, **kwargs):
         request.session['active'] = True
-        request.session['hospital_id'] = request.data.get('hospital_id')
+        request.session['hospital_id'] = request.data.get('active_account')
         
         return Response(
             {

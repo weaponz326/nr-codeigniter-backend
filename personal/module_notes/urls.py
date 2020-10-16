@@ -8,4 +8,5 @@ urlpatterns = [
     path('note-list', views.NoteListView.as_view()),
     path('subject/', views.SubjectView.as_view()),
     path('body/', views.BodyView.as_view()),
+    path('file/', views.FileView.as_view()),
 ]

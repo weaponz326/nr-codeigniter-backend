@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, mixins
+from rest_framework.parsers import FileUploadParser
 
 from .models import Note, NoteFile
 from .serializers import NoteSerializer, NoteFileSerializer
@@ -100,7 +101,24 @@ class BodyView(APIView):
 # file attachments
 
 class FileView(APIView):
-    def post(self, request, *args, **kwargs):        
-        serializer_class = NoteFileSerializer
-        # TODO
+    parser_class = (FileUploadParser,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = NoteFileSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+        return Response({ 'status': True })
+
+        # if 'file' not in request.data:
+        #     raise ParseError("Empty content")
+        # f = request.data['file']
+        # NoteFile.file.save(f.name, f, save=True)
+        # return Response({ 'status': True })
+
+    def delete(self, request, *args, **kwargs):
         pass
+
+        # NoteFile.file.delete(save=True)
+        # return Response({ 'status': True })
