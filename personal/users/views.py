@@ -78,6 +78,7 @@ def insert_session_receiver(request, sender, user, **kwargs):
 
     # insert location and about into profile
     profile = Profile(user=user, location=request.session['location'], about=request.session['about'])
+    profile.id = user.id
     profile.save()
 
     # save user to session
