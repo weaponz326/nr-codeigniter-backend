@@ -19,14 +19,21 @@ from .serializers import ProfileStoreSerializer, ProfileSerializer
 class ProfileStoreView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ProfileStoreSerializer(data=request.data)
+        
         if serializer.is_valid():
             request.session['first_name'] = request.data.get('first_name')
             request.session['last_name'] = request.data.get('last_name')
             request.session['location'] = request.data.get('location')
             request.session['about'] = request.data.get('about')
+            
             return Response({'status': True})
         else:
-            return Response({'status': False})
+            return Response(
+                {
+                    'status': False,
+                    'errors': serializer.errors
+                }
+            )
 
 class ProfileView(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
@@ -41,17 +48,6 @@ class PollVerificationView(APIView):
             return Response({'ver_status': True})
         else:
             return Response({'ver_status': False})
-
-# use email to get user to be verified and assign to session
-class VerificationEmailView(APIView):
-    def post(self, request, *args, **kwargs):
-        email = User.objects.filter(email=request.data.get('email'))
-        if email.exists():
-            user = User.objects.get(email=request.data.get('email'))
-            request.session['user_id'] = user.id
-            return Response({'status': True})
-        else:
-            return Response({'status': False})
 
 # check if user is looged in
 class LoginStatusView(APIView):
