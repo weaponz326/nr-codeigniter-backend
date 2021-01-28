@@ -50,13 +50,13 @@ INSTALLED_APPS = [
     'rest_auth.registration',
 
     'users',
+    'module_portal',
+    'module_settings',
     'module_calendar',
     'module_budget',
     'module_notes',
     'module_accounts',
-    'module_tasks',
-    'module_portal',
-    'module_settings',
+    'module_tasks',   
 ]
 
 MIDDLEWARE = [
@@ -91,6 +91,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'personal.wsgi.application'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

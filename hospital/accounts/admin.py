@@ -4,6 +4,6 @@ from .models import Profile
 # Register your models here.
 
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location')
+    list_display = ('id', 'name', 'location')
 
 admin.site.register(Profile, ProfileAdmin)

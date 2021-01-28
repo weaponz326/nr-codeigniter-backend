@@ -42,7 +42,23 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'accounts',
+    # 'module_portal',
     'module_admin',
+    # 'module_settings',
+    'module_patients',
+    'module_appointments',
+    'module_staff',
+    'module_bills',
+    'module_doctors',
+    'module_laboratory',
+    'module_payments',
+    'module_nurses',
+    'module_diagnosis',
+    'module_prescriptions',
+    'module_drugs',
+    'module_admissions',
+    'module_wards',
+    'module_dispensary',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +91,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'hospital.wsgi.application'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 # Database
@@ -125,6 +143,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# change default date time format
+DATETIME_FORMAT = 'Y-m-d H:M:S'
 
 
 # cors settings

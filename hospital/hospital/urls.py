@@ -23,4 +23,18 @@ urlpatterns = [
     
     path('accounts/', include('accounts.urls')),
     path('module-admin/', include('module_admin.urls')),
+    path('module-patients/', include('module_patients.urls')),
+    path('module-appointments/', include('module_appointments.urls')),
+    path('module-staff/', include('module_staff.urls')),
+    path('module-bills/', include('module_bills.urls')),
+    path('module-doctors/', include('module_doctors.urls')),
+    path('module-laboratory/', include('module_laboratory.urls')),
+    path('module-payments/', include('module_payments.urls')),
+    path('module-nurses/', include('module_nurses.urls')),
+    path('module-diagnosis/', include('module_diagnosis.urls')),
+    path('module-prescriptions/', include('module_prescriptions.urls')),
+    path('module-drugs/', include('module_drugs.urls')),
+    path('module-admissions/', include('module_admissions.urls')),
+    path('module-wards/', include('module_wards.urls')),
+    path('module-dispensary/', include('module_dispensary.urls')),
 ]
