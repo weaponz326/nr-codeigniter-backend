@@ -1,0 +1,20 @@
+from rest_framework import serializers
+
+from .models import Reservation
+
+
+class ReservationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reservation
+        fields = [
+            'id', 
+            'restaurant', 
+            'reservation_code', 
+            'reservation_date', 
+            'customer_name',
+            'number_guests'
+            'number_tables' 
+            'arrival_date' 
+            'reservation_status'
+        ]

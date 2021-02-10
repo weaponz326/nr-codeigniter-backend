@@ -16,7 +16,7 @@ class ProfileView(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
-# creates a new hospital profile and add creator to personal users
+# creates a new restaurant profile and add creator to personal users
 class NewProfileView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ProfileSerializer(data=request.data)
@@ -46,7 +46,8 @@ class NewProfileView(APIView):
                     'errors': serializer.errors
                 }
             )
-# checks if user has a hospital acount
+
+# checks if user has a restaurant acount
 class HasAccountView(APIView):
     def post(self, request, *args, **kwargs):
         user = User.objects.filter(personal_id=request.data.get('personal_id'))
@@ -64,7 +65,7 @@ class ActiveAccountView(APIView):
         return Response(
             {
                 'active': request.session['active'],
-                'hospital_id': request.session['hospital_id']
+                'restaurant_id': request.session['restaurant_id']
             }
         )
 
@@ -72,11 +73,11 @@ class ActiveAccountView(APIView):
         return Response(
             {
                 'active': request.session['active'],
-                'hospital_id': request.session['hospital_id']
+                'restaurant_id': request.session['restaurant_id']
             }
         )
 
-# get all hospital suites of a personal id
+# get all restaurant suites of a personal id
 class UserAccountsView(generics.ListAPIView):
     serializer_class = UserAccountsSerializer
 

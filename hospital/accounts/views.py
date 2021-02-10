@@ -47,7 +47,6 @@ class NewProfileView(APIView):
                 }
             )
 
-
 # checks if user has a hospital acount
 class HasAccountView(APIView):
     def post(self, request, *args, **kwargs):
