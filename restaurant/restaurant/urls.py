@@ -23,6 +23,8 @@ urlpatterns = [
     
     path('accounts/', include('accounts.urls')),
     path('module-admin/', include('module_admin.urls')),
+    path('module-settings/', include('module_settings.urls')),
+    path('module-portal/', include('module_portal.urls')),
     path('module-menu/', include('module_menu.urls')),
     path('module-staff/', include('module_staff.urls')),
     path('module-tables/', include('module_tables.urls')),

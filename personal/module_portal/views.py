@@ -97,7 +97,8 @@ class RinkListView(generics.ListAPIView):
         queryset = Rink.objects.all()
         user = self.request.query_params.get('user', None)
         if user is not None:
-            queryset = queryset.filter(sender__id=user)
+            # queryset = queryset.filter(recipient__id=user).filter(sender__id=user)
+            queryset = queryset.filter(recipient__id=user)
         return queryset
 
 # get a specific rink

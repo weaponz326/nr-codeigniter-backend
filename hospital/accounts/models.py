@@ -8,4 +8,4 @@ class Profile(models.Model):
     about = models.TextField()
 
     def __str__(self):
-        return self.id
+        return str(self.id)

@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'accounts',
-    # 'module_portal',
+    'module_portal',
     'module_admin',
-    # 'module_settings',
+    'module_settings',
     'module_patients',
     'module_appointments',
     'module_staff',

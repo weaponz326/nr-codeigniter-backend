@@ -3,11 +3,10 @@ from . import views
 
 
 urlpatterns = [
-    path('profile-user/<int:pk>', views.ProfileUserView.as_view()),
-    path('user/<int:pk>', views.UserView.as_view()),
-    path('profile/<int:pk>', views.ProfileView.as_view()),
-    path('additional-profile/<int:pk>', views.AdditionalProfileDetailView.as_view()),
-    path('location-details/<int:pk>', views.LocationDetailsDetailView.as_view()),
-    path('additional-profile/', views.AdditionalProfileView.as_view()),
-    path('location-details/', views.LocationDetailsView.as_view()),
+    path('user/<int:pk>', views.UserDetailView.as_view()),
+    path('profile/<int:pk>', views.ProfileDetailView.as_view()),
+    path('extended-profile/<int:pk>', views.ExtendedProfileDetailView.as_view()),
+    path('additional-extended/', views.AdditionalExtendedView.as_view()),
+    path('location-extended/', views.LocationExtendedView.as_view()),
+    path('contact-extended/', views.ContactExtendedView.as_view()),
 ]
