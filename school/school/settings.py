@@ -43,6 +43,21 @@ INSTALLED_APPS = [
 
     'accounts',
     'module_admin',
+    'module_portal',
+    'module_parents',
+    'module_assessment',
+    'module_subjects',
+    'module_attendance',
+    'module_students',
+    'module_reports',
+    'module_terms',
+    'module_staff',
+    'module_classes',
+    'module_fees',
+    'module_teachers',
+    'module_settings',
+    'module_payments',
+    'module_timetables',
 ]
 
 MIDDLEWARE = [

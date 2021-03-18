@@ -4,7 +4,7 @@ from .models import User, Access, Activity
 # Register your models here.
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('hospital', 'personal_id', 'is_admin')
+    list_display = ('id', 'hospital', 'personal_id', 'is_admin')
 
 class AccessAdmin(admin.ModelAdmin):
     list_display = ('user', 'admin_access', 'portal_access', 'settings_access')
