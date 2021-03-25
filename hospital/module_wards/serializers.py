@@ -8,7 +8,7 @@ class WardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ward
-        fields = ['id', 'hospital', 'ward_number', 'ward_name', 'ward_type', 'location', 'capacity']
+        fields = ['id', 'ward_number', 'ward_name', 'ward_type', 'location', 'capacity']
 
 # ward's patients
 
@@ -19,7 +19,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ['id', 'hospital', 'patient_name', 'clinical_number']
+        fields = ['id', 'patient_name', 'clinical_number']
 
     def get_patient_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 

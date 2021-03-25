@@ -29,8 +29,12 @@ class ClassView(APIView):
                 location=request.data.get("location"),
             )
             clas.save()
+            latest_class = Classes.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'class_id': latest_class.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 

@@ -45,8 +45,12 @@ class ParentView(APIView):
                 post_code=request.data.get("post_code"),
             )
             parent.save()
+            latest_parent = Parent.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'parent_id': latest_parent.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 

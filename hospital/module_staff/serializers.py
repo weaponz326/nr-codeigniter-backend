@@ -8,7 +8,6 @@ class StaffSerializer(serializers.ModelSerializer):
         model = Staff
         fields = [
             'id', 
-            'hospital', 
             'first_name',
             'last_name',
             'sex',
@@ -37,7 +36,6 @@ class StaffListSerializer(serializers.ModelSerializer):
         model = Staff
         fields = [
             'id', 
-            'hospital', 
             'staff_code',
             'staff_name',
             'department',

@@ -12,7 +12,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ['id', 'hospital', 'patient_name', 'clinical_number']
+        fields = ['id', 'patient_name', 'clinical_number']
 
     def get_patient_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 
@@ -22,7 +22,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ['id', 'hospital', 'doctor_name', 'doctor_code']
+        fields = ['id', 'doctor_name', 'doctor_code']
 
     def get_doctor_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 
@@ -35,27 +35,25 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = [
             'id', 
-            'hospital', 
             'patient', 
             'consultant', 
             'appointment_code', 
+            'appointment_date', 
             'appointment_for', 
             'remarks', 
             'appointment_status'
         ]
 
-# for saving appointment patient and consultant with ids
-# to prevent saving with dictionary        
+# for saving appointment
+# to prevent saving with foreign keys        
 class AppointmentSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appointment
         fields = [
             'id', 
-            'hospital', 
-            'patient', 
-            'consultant', 
             'appointment_code', 
+            'appointment_date', 
             'appointment_for', 
             'remarks', 
             'appointment_status'

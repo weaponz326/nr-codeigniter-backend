@@ -26,7 +26,7 @@ class NewBillView(APIView):
         serializer = BillSaveSerializer(data=request.data)
         if serializer.is_valid():
             bill = Bill(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 order=Order.objects.get(id=request.data.get("order_id")),
                 sitting=Sitting.objects.get(id=request.data.get("sitting_id")),
                 delivery=Delivery.objects.get(id=request.data.get("delivery_id")),
@@ -56,7 +56,7 @@ class BillView(APIView):
         serializer = BillSaveSerializer(data=request.data)
         if serializer.is_valid():
             bill = Bill(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 order=Order.objects.get(id=request.data.get("order_id")),
                 sitting=Sitting.objects.get(id=request.data.get("sitting_id")),
                 delivery=Delivery.objects.get(id=request.data.get("delivery_id")),
@@ -78,7 +78,7 @@ class BillListView(generics.ListAPIView):
         queryset = Bill.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class BillDetailView(
@@ -109,7 +109,7 @@ class OrderListView(generics.ListAPIView):
         queryset = Order.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class SittingListView(generics.ListAPIView):
@@ -119,7 +119,7 @@ class SittingListView(generics.ListAPIView):
         queryset = Sitting.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class DeliveryListView(generics.ListAPIView):
@@ -129,6 +129,6 @@ class DeliveryListView(generics.ListAPIView):
         queryset = Delivery.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 

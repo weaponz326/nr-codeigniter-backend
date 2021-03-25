@@ -25,7 +25,7 @@ class NewPrescriptionView(APIView):
         serializer = PrescriptionSaveSerializer(data=request.data)
         if serializer.is_valid():
             prescription = Prescription(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 prescription_code=request.data.get("prescription_code"),
                 prescription_date=request.data.get("prescription_date"),
             )
@@ -50,7 +50,7 @@ class PrescriptionView(APIView):
         serializer = PrescriptionSaveSerializer(data=request.data)
         if serializer.is_valid():
             prescription = Prescription(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 patient=Patient.objects.get(id=request.data.get("patient_id")),
                 doctor=Doctor.objects.get(id=request.data.get("doctor_id")),
                 prescription_code=request.data.get("prescription_code"),
@@ -69,7 +69,7 @@ class PrescriptionListView(generics.ListAPIView):
         queryset = Prescription.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class PrescriptionDetailView(
@@ -153,7 +153,7 @@ class PatientListView(generics.ListAPIView):
         queryset = Patient.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class DoctorListView(generics.ListAPIView):
@@ -163,5 +163,5 @@ class DoctorListView(generics.ListAPIView):
         queryset = Doctor.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset

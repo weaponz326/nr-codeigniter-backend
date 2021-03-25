@@ -15,11 +15,11 @@ class Appointment(models.Model):
         ('Cancelled', 'Cancelled'),
     ]
 
-    hospital = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     consultant = models.ForeignKey(Doctor, on_delete=models.CASCADE, null=True, blank=True)
     appointment_code = models.CharField(max_length=50, blank=True)
-    appointment_date = models.DateField(null=True, blank=True)
+    appointment_date = models.DateTimeField(null=True, blank=True)
     appointment_for = models.CharField(max_length=100, blank=True)
     remarks = models.TextField(max_length=100, blank=True)
     appointment_status = models.CharField(max_length=50, choices=STATUS_CHOICES, blank=True)

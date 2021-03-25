@@ -10,14 +10,14 @@ class BillSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bill
-        fields = ['id', 'restaurant', 'bill_code', 'bill_date']
+        fields = ['id', 'bill_code', 'bill_date']
 
 class PaymentSerializer(serializers.ModelSerializer):
     bill = BillSerializer()
 
     class Meta:
         model = Payment
-        fields = ['id', 'restaurant', 'bill', 'payment_code', 'payment_date', 'amount_paid', 'balance']
+        fields = ['id', 'bill', 'payment_code', 'payment_date', 'amount_paid', 'balance']
 
 # for saving payment bill with id
 # to prevent saving with dictionary        
@@ -25,4 +25,4 @@ class PaymentSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['id', 'restaurant', 'bill', 'payment_code', 'payment_date', 'amount_paid', 'balance']
+        fields = ['id', 'bill', 'payment_code', 'payment_date', 'amount_paid', 'balance']

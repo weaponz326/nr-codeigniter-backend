@@ -8,7 +8,6 @@ class NurseSerializer(serializers.ModelSerializer):
         model = Nurse
         fields = [
             'id', 
-            'hospital', 
             'first_name',
             'last_name',
             'sex',
@@ -36,7 +35,6 @@ class NurseListSerializer(serializers.ModelSerializer):
         model = Nurse
         fields = [
             'id', 
-            'hospital', 
             'nurse_name',
             'nurse_code',
             'department',

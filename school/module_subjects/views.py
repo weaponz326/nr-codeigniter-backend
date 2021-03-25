@@ -31,8 +31,12 @@ class SubjectView(APIView):
                 description=request.data.get("description"),
             )
             subject.save()
+            latest_subject = Subject.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'dubject_id': latest_subject.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 

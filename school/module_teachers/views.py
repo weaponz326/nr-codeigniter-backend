@@ -41,8 +41,12 @@ class TeacherView(APIView):
                 education=request.data.get("education"),
             )
             teacher.save()
+            latest_teacher = Teacher.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'teacher': latest_teacher.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 

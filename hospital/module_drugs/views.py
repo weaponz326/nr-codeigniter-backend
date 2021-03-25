@@ -22,7 +22,7 @@ class DrugView(APIView):
         serializer = DrugSerializer(data=request.data)
         if serializer.is_valid():
             drug = Drug(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 ndc_number=request.data.get("ndc_number"),
                 drug_name=request.data.get("drug_name"),
                 generic_name=request.data.get("generic_name"),
@@ -43,8 +43,12 @@ class DrugView(APIView):
                 refill_ordered=request.data.get("refill_ordered"),
             )
             drug.save()
+            latest_drug = Drug.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'drug_id': latest_drug.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -55,7 +59,7 @@ class DrugListView(generics.ListAPIView):
         queryset = Drug.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class DrugDetailView(

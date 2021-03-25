@@ -18,7 +18,7 @@ class NewPaymentView(APIView):
         serializer = PaymentSaveSerializer(data=request.data)
         if serializer.is_valid():
             payment = Payment(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 bill=Bill.objects.get(id=request.data.get("bill_id")),
                 payment_code=request.data.get("payment_code"),
                 payment_date=request.data.get("payment_date"),
@@ -46,7 +46,7 @@ class PaymentView(APIView):
         serializer = PaymentSaveSerializer(data=request.data)
         if serializer.is_valid():
             payment = Payment(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 bill=Bill.objects.get(id=request.data.get("bill_id")),
                 payment_code=request.data.get("payment_code"),
                 payment_date=request.data.get("payment_date"),
@@ -66,7 +66,7 @@ class PaymentListView(generics.ListAPIView):
         queryset = Payment.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class PaymentDetailView(
@@ -97,5 +97,5 @@ class BillListView(generics.ListAPIView):
         queryset = Bill.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset

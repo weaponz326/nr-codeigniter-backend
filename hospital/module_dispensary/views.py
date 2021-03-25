@@ -23,7 +23,7 @@ class NewDispensaryView(APIView):
         serializer = DispensarySaveSerializer(data=request.data)
         if serializer.is_valid():
             dispensary = Dispensary(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 dispense_code=request.data.get("dispense_code"),
                 dispense_date=request.data.get("dispense_date"),
             )
@@ -48,7 +48,7 @@ class DispensaryView(APIView):
         serializer = DispensarySaveSerializer(data=request.data)
         if serializer.is_valid():
             dispensary = Dispensary(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 prescription=Prescripton.objects.get(id=request.data.get("prescription_id")),
                 dispensary_code=request.data.get("dispensary_code"),
                 dispensary_date=request.data.get("dispensary_date"),
@@ -66,7 +66,7 @@ class DispensaryListView(generics.ListAPIView):
         queryset = Dispensary.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class DispensaryDetailView(
@@ -149,6 +149,6 @@ class PrescriptionListView(generics.ListAPIView):
         queryset = Prescription.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 

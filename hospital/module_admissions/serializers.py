@@ -12,7 +12,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ['id', 'hospital', 'patient_name', 'clinical_number']
+        fields = ['id', 'patient_name', 'clinical_number']
 
     def get_patient_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 
@@ -22,7 +22,7 @@ class AdmissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Admission
-        fields = ['id', 'hospital', 'patient', 'admission_code', 'admission_date', 'discharge_date', 'admission_status']
+        fields = ['id', 'patient', 'admission_code', 'admission_date', 'discharge_date', 'admission_status']
 
 # for saving admission patient ids
 # to prevent saving with dictionary        
@@ -30,4 +30,4 @@ class AdmissionSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Admission
-        fields = ['id', 'hospital', 'patient', 'admission_code', 'admission_date', 'discharge_date', 'admission_status']
+        fields = ['id', 'patient', 'admission_code', 'admission_date', 'discharge_date', 'admission_status']

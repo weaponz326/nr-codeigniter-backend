@@ -5,7 +5,7 @@ from .models import Dispensary, Detail
 # Register your models here.
 
 class DispensaryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'hospital', 'dispense_code', 'dispense_date', 'prescription')
+    list_display = ('id', 'account', 'dispense_code', 'dispense_date', 'prescription')
 
 class DetailAdmin(admin.ModelAdmin):
     list_display = ('id', 'dispensary', 'drug')

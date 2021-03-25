@@ -22,7 +22,7 @@ class StaffView(APIView):
         serializer = StaffSerializer(data=request.data)
         if serializer.is_valid():
             staff = Staff(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
                 sex=request.data.get("sex"),
@@ -39,12 +39,16 @@ class StaffView(APIView):
                 department=request.data.get("department"),
                 job=request.data.get("job"),
                 work_status=request.data.get("work_status"),
-                stated_work=request.data.get("started_work"),
+                started_work=request.data.get("started_work"),
                 ended_work=request.data.get("ended_work"),
             )
             staff.save()
+            latest_staff = Staff.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'staff_id': latest_staff.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -55,7 +59,7 @@ class StaffListView(generics.ListAPIView):
         queryset = Staff.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class StaffDetailView(

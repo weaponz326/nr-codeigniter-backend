@@ -8,7 +8,6 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = [
             'id', 
-            'restaurant', 
             'first_name',
             'last_name',
             'sex',
@@ -32,7 +31,6 @@ class CustomerListSerializer(serializers.ModelSerializer):
         model = Customer
         fields = [
             'id', 
-            'restaurant', 
             'customer_name',
             'sex',
             'phone',

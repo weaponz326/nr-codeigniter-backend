@@ -26,9 +26,7 @@ class NewPaymentView(APIView):
         serializer = PaymentSaveSerializer(data=request.data)
         if serializer.is_valid():
             payment = Payment(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
-                patient=Patient.objects.get(id=request.data.get("patient_id")),
-                admission=Admission.objects.get(id=request.data.get("admission_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 bill=Bill.objects.get(id=request.data.get("bill_id")),
                 payment_code=request.data.get("payment_code"),
                 payment_date=request.data.get("payment_date"),
@@ -56,9 +54,7 @@ class PaymentView(APIView):
         serializer = PaymentSaveSerializer(data=request.data)
         if serializer.is_valid():
             payment = Payment(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
-                patient=Patient.objects.get(id=request.data.get("patient_id")),
-                admission=Admission.objects.get(id=request.data.get("admission_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 bill=Bill.objects.get(id=request.data.get("bill_id")),
                 payment_code=request.data.get("payment_code"),
                 payment_date=request.data.get("payment_date"),
@@ -78,7 +74,7 @@ class PaymentListView(generics.ListAPIView):
         queryset = Payment.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class PaymentDetailView(
@@ -102,26 +98,6 @@ class PaymentDetailView(
 # patient,  admission and bill select grid list
 # --------------------------------------------------------------------------------------------------
 
-class PatientListView(generics.ListAPIView):
-    serializer_class = PatientSerializer
-
-    def get_queryset(self):
-        queryset = Patient.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
-        return queryset
-
-class AdmissionListView(generics.ListAPIView):
-    serializer_class = AdmissionSerializer
-
-    def get_queryset(self):
-        queryset = Admission.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
-        return queryset
-
 class BillListView(generics.ListAPIView):
     serializer_class = BillSerializer
 
@@ -129,5 +105,5 @@ class BillListView(generics.ListAPIView):
         queryset = Bill.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset

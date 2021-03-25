@@ -23,7 +23,7 @@ class AdmissionView(APIView):
         serializer = AdmissionSaveSerializer(data=request.data)
         if serializer.is_valid():
             admission = Admission(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 patient=Patient.objects.get(id=request.data.get("patient_id")),
                 admission_code=request.data.get("admission_code"),
                 admission_date=request.data.get("admission_date"),
@@ -31,8 +31,12 @@ class AdmissionView(APIView):
                 admission_status=request.data.get("admission_status"),
             )
             admission.save()
+            latest_admission = Admission.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'admission_id': latest_admission.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -43,7 +47,7 @@ class AdmissionListView(generics.ListAPIView):
         queryset = Admission.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class AdmissionDetailView(
@@ -73,5 +77,5 @@ class PatientListView(generics.ListAPIView):
         queryset = Patient.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset

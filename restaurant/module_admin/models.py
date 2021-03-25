@@ -5,7 +5,7 @@ from accounts.models import Profile
 # Create your models here.
 
 class User(models.Model):
-    restaurant = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     personal_id = models.PositiveIntegerField()
     is_creator = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)

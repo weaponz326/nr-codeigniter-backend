@@ -12,19 +12,19 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'restaurant', 'order_code', 'order_date', 'customer_name']
+        fields = ['id', 'order_code', 'order_date', 'customer_name']
 
 class SittingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sitting
-        fields = ['id', 'restaurant', 'sitting_code', 'sitting_date']
+        fields = ['id', 'sitting_code', 'sitting_date']
 
 class DeliverySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Delivery
-        fields = ['id', 'restaurant', 'delivery_code', 'delivery_date']
+        fields = ['id', 'delivery_code', 'delivery_date']
 
 class BillSerializer(serializers.ModelSerializer):
     order = OrderSerializer()
@@ -35,7 +35,6 @@ class BillSerializer(serializers.ModelSerializer):
         model = Bill
         fields = [
             'id', 
-            'restaurant', 
             'order', 
             'delivery', 
             'sitting', 
@@ -53,7 +52,6 @@ class BillSaveSerializer(serializers.ModelSerializer):
         model = Bill
         fields = [
             'id', 
-            'restaurant', 
             'order', 
             'delivery', 
             'sitting', 

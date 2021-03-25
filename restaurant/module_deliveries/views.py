@@ -23,7 +23,7 @@ class DeliveryView(APIView):
         serializer = DeliverySaveSerializer(data=request.data)
         if serializer.is_valid():
             delivery = Delivery(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 order=Patient.objects.get(id=request.data.get("order_id")),
                 delivery_code=request.data.get("delivery_code"),
                 delivery_date=request.data.get("delivery_date"),
@@ -42,7 +42,7 @@ class DeliveryListView(generics.ListAPIView):
         queryset = Delivery.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class DeliveryDetailView(
@@ -71,5 +71,5 @@ class OrderListView(generics.ListAPIView):
         queryset = Order.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset

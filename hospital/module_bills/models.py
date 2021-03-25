@@ -8,7 +8,7 @@ from module_admissions.models import Admission
 # Create your models here.
 
 class Bill(models.Model):
-    hospital = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     admission = models.ForeignKey(Admission, on_delete=models.CASCADE, null=True, blank=True)
     bill_code = models.CharField(max_length=50, blank=True)

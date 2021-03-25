@@ -22,7 +22,7 @@ class MenuItemView(APIView):
         serializer = MenuItemSerializer(data=request.data)
         if serializer.is_valid():
             menu = MenuItem(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 item_code=request.data.get("item_code"),
                 item_name=request.data.get("item_name"),
                 category=request.data.get("category"),
@@ -30,8 +30,12 @@ class MenuItemView(APIView):
                 description=request.data.get("description"),
             )
             menu.save()
+            latest_menu_item = MenuItem.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'menu_item_id': latest_menu_item.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -42,7 +46,7 @@ class MenuItemListView(generics.ListAPIView):
         queryset = MenuItem.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class MenuItemDetailView(

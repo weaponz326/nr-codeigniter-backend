@@ -8,7 +8,6 @@ class SittingSerializer(serializers.ModelSerializer):
         model = Sitting
         fields = [
             'id', 
-            'restaurant', 
             'sitting_code', 
             'sitting_date', 
             'arrival_time', 

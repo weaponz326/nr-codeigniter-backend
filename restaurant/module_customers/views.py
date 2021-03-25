@@ -22,7 +22,7 @@ class CustomerView(APIView):
         serializer = CustomerSerializer(data=request.data)
         if serializer.is_valid():
             customer = Customer(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
                 sex=request.data.get("sex"),
@@ -38,8 +38,12 @@ class CustomerView(APIView):
                 preferences=request.data.get("preferences"),
             )
             customer.save()
+            latest_customer = Customer.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'customer_id': latest_customer.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -50,7 +54,7 @@ class CustomerListView(generics.ListAPIView):
         queryset = Customer.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class CustomerDetailView(

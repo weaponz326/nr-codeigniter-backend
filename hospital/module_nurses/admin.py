@@ -5,6 +5,6 @@ from .models import Nurse
 # Register your models here.
 
 class NurseAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name', 'hospital', 'nurse_code', 'department')
+    list_display = ('id', 'first_name', 'last_name', 'account', 'nurse_code', 'department')
 
 admin.site.register(Nurse, NurseAdmin)

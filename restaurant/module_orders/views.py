@@ -23,7 +23,7 @@ class OrderView(APIView):
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = Order(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 order_code=request.data.get("order_code"),
                 order_date=request.data.get("order_date"),
                 customer_name=request.data.get("customer_name"),
@@ -43,7 +43,7 @@ class OrderListView(generics.ListAPIView):
         queryset = Order.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class OrderDetailView(
@@ -128,5 +128,5 @@ class MenuItemListView(generics.ListAPIView):
         queryset = MenuItem.objects.all()
         restaurant = self.request.query_params.get('restaurant', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset

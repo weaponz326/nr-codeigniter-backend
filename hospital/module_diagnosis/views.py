@@ -19,49 +19,17 @@ class NewDiagnosisView(APIView):
         serializer = DiagnosisSaveSerializer(data=request.data)
         if serializer.is_valid():
             diagnosis = Diagnosis(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 diagnosis_code=request.data.get("diagnosis_code"),
                 diagnosis_date=request.data.get("diagnosis_date"),
             )
             diagnosis.save()
-            ladetail_diagnosis = Diagnosis.objects.ladetail("id")
+            latest_diagnosis = Diagnosis.objects.latest("id")
 
             return Response({
                 'status': True,
-                'diagnosis_id': ladetail_diagnosis.id
+                'diagnosis_id': latest_diagnosis.id
             })
-        else:
-            return Response({ 'status': False })
-
-class DiagnosisView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = DiagnosisSerializer
-        queryset = Diagnosis.objects.all()
-
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = DiagnosisSaveSerializer(data=request.data)
-        if serializer.is_valid():
-            diagnosis = Diagnosis(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
-                patient=Patient.objects.get(id=request.data.get("patient_id")),
-                doctor=Doctor.objects.get(id=request.data.get("doctor_id")),
-                diagnosis_code=request.data.get("diagnosis_code"),
-                diagnosis_date=request.data.get("diagnosis_date"),
-                blood_group=request.data.get("detail_name"),
-                temperature=request.data.get("temperature"),
-                weight=request.data.get("weight"),
-                height=request.data.get("height"),
-                blood_pressure=request.data.get("blood_pressure"),
-                pulse=request.data.get("pulse"),
-                diagnosis_detail=request.data.get("diagnosis_detail"),
-                treatment=request.data.get("treatment"),
-                remarks=request.data.get("remarks")
-            )
-            diagnosis.save()
-
-            return Response({ 'status': True })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -72,11 +40,10 @@ class DiagnosisListView(generics.ListAPIView):
         queryset = Diagnosis.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
-class DiagnosisDetailView(
-    mixins.RetrieveModelMixin,
+class DiagnosisView(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     generics.GenericAPIView):
@@ -84,14 +51,15 @@ class DiagnosisDetailView(
     queryset = Diagnosis.objects.all()
     serializer_class = DiagnosisSaveSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
+    def put(self, request, *args, kwargs):
         return self.update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+class DiagnosisDetailView(generics.RetrieveAPIView):
+    queryset = Diagnosis.objects.all()
+    serializer_class = DiagnosisSerializer
 
 # patient and doctor select grid list
 # --------------------------------------------------------------------------------------------------
@@ -103,7 +71,7 @@ class PatientListView(generics.ListAPIView):
         queryset = Patient.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class DoctorListView(generics.ListAPIView):
@@ -113,5 +81,5 @@ class DoctorListView(generics.ListAPIView):
         queryset = Doctor.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset

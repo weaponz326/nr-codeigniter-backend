@@ -30,8 +30,12 @@ class TermView(APIView):
                 term_status=request.data.get("term_status"),
             )
             term.save()
+            latest_term = Terms.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'term_id': latest_term.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 

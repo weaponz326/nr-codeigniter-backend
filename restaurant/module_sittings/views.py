@@ -22,7 +22,7 @@ class SittingView(APIView):
         serializer = SittingSerializer(data=request.data)
         if serializer.is_valid():
             sitting = Sitting(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 sitting_code=request.data.get("sitting_code"),
                 sitting_date=request.data.get("sitting_date"),
                 arrival_time=request.data.get("arrival_time"),
@@ -43,7 +43,7 @@ class SittingListView(generics.ListAPIView):
         queryset = Sitting.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class SittingDetailView(

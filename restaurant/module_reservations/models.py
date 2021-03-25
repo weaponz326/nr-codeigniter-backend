@@ -6,7 +6,7 @@ from accounts.models import Profile
 # Create your models here.
 
 class Reservation(models.Model):
-    restaurant = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     reservation_code = models.CharField(max_length=50, blank=True)
     reservation_date = models.DateTimeField(null=True, blank=True)
     customer_name = models.CharField(max_length=100, blank=True)

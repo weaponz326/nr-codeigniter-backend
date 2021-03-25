@@ -8,7 +8,7 @@ from module_doctors.models import Doctor
 # Create your models here.
 
 class Diagnosis(models.Model):
-    hospital = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, null=True, blank=True)
     diagnosis_code = models.CharField(max_length=50, blank=True)

@@ -7,7 +7,7 @@ from module_menu.models import MenuItem
 # Create your models here.
 
 class Order(models.Model):
-    restaurant = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     order_code = models.CharField(max_length=50, blank=True)
     order_date = models.DateField(null=True, blank=True)
     customer_name = models.CharField(max_length=100, blank=True)

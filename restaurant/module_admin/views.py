@@ -25,7 +25,7 @@ class UserView(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = User(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 personal_id=request.data.get("personal_id"),
                 is_creator=request.data.get("is_creator"),
                 is_admin=request.data.get("is_admin"),
@@ -112,7 +112,7 @@ class AccessListView(generics.ListAPIView):
         queryset = Access.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class AccessDetailView(

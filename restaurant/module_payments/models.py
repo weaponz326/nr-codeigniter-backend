@@ -7,7 +7,7 @@ from module_bills.models import Bill
 # Create your models here.
 
 class Payment(models.Model):
-    restaurant = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE, null=True, blank=True)
     payment_code = models.CharField(max_length=50, blank=True)
     payment_date = models.DateField(null=True, blank=True)

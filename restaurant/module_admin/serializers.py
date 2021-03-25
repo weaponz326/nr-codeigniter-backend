@@ -5,7 +5,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['restaurant', 'personal_id', 'is_admin', 'is_manager', 'is_creator']
+        fields = ['account', 'personal_id', 'is_admin', 'is_manager', 'is_creator']
 
 class AccessSerializer(serializers.ModelSerializer):
     class Meta:

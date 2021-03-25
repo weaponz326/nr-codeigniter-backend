@@ -25,7 +25,7 @@ class NewBillView(APIView):
         serializer = BillSaveSerializer(data=request.data)
         if serializer.is_valid():
             bill = Bill(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 patient=Patient.objects.get(id=request.data.get("patient_id")),
                 admission=Admission.objects.get(id=request.data.get("admission_id")),
                 bill_code=request.data.get("bill_code"),
@@ -53,7 +53,7 @@ class BillView(APIView):
         serializer = BillSaveSerializer(data=request.data)
         if serializer.is_valid():
             bill = Bill(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 patient=Patient.objects.get(id=request.data.get("patient_id")),
                 admission=Admission.objects.get(id=request.data.get("admission_id")),
                 bill_code=request.data.get("bill_code"),
@@ -73,7 +73,7 @@ class BillListView(generics.ListAPIView):
         queryset = Bill.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class BillDetailView(
@@ -156,7 +156,7 @@ class PatientListView(generics.ListAPIView):
         queryset = Patient.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class AdmissionListView(generics.ListAPIView):
@@ -166,5 +166,5 @@ class AdmissionListView(generics.ListAPIView):
         queryset = Admission.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset

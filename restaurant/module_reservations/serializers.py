@@ -9,7 +9,6 @@ class ReservationSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = [
             'id', 
-            'restaurant', 
             'reservation_code', 
             'reservation_date', 
             'customer_name',

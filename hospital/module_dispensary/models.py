@@ -8,7 +8,7 @@ from module_drugs.models import Drug
 # Create your models here.
 
 class Dispensary(models.Model):
-    hospital = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True, blank=True)
     dispense_code = models.CharField(max_length=50, blank=True)
     dispense_date = models.DateField(null=True, blank=True)

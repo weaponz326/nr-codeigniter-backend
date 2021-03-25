@@ -22,7 +22,7 @@ class StaffView(APIView):
         serializer = StaffSerializer(data=request.data)
         if serializer.is_valid():
             staff = Staff(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
                 sex=request.data.get("sex"),
@@ -43,8 +43,12 @@ class StaffView(APIView):
                 ended_work=request.data.get("ended_work"),
             )
             staff.save()
+            latest_staff = Staff.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'staff_id': latest_staff.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -55,7 +59,7 @@ class StaffListView(generics.ListAPIView):
         queryset = Staff.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class StaffDetailView(

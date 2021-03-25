@@ -15,7 +15,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ['id', 'hospital', 'patient_name', 'clinical_number']
+        fields = ['id', 'patient_name', 'clinical_number']
 
     def get_patient_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 
@@ -25,7 +25,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ['id', 'hospital', 'doctor_name', 'doctor_code']
+        fields = ['id', 'doctor_name', 'doctor_code']
 
     def get_doctor_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 
@@ -36,7 +36,7 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Prescription
-        fields = ['id', 'hospital', 'patient', 'doctor', 'prescription_code', 'prescription_date']
+        fields = ['id', 'patient', 'doctor', 'prescription_code', 'prescription_date']
 
 # merge prescription containing patient and doctor to dispensary
 class DispensarySerializer(serializers.ModelSerializer):
@@ -44,7 +44,7 @@ class DispensarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dispensary
-        fields = ['id', 'hospital', 'prescription', 'dispense_code', 'dispense_date']
+        fields = ['id', 'prescription', 'dispense_code', 'dispense_date']
 
 # for saving dispensary's prescription with id
 # to prevent saving with dictionary        
@@ -52,7 +52,7 @@ class DispensarySaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Prescription
-        fields = ['id', 'hospital', 'prescription', 'dispense_code', 'dispense_date']
+        fields = ['id', 'prescription', 'dispense_code', 'dispense_date']
 
 # -----------------------------------------------------------------------------------------------------------
 # dispensary details

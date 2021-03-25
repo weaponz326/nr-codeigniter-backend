@@ -5,7 +5,7 @@ from .models import Ward, WardPatient
 # Register your models here.
 
 class WardAdmin(admin.ModelAdmin):
-    list_display = ('id', 'hospital', 'ward_number', 'ward_name')
+    list_display = ('id', 'account', 'ward_number', 'ward_name')
 
 class WardPatientAdmin(admin.ModelAdmin):
     list_display = ('id', 'ward', 'patient', 'status')

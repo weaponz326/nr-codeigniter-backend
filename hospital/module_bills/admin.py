@@ -5,7 +5,7 @@ from .models import Bill, General
 # Register your models here.
 
 class BillAdmin(admin.ModelAdmin):
-    list_display = ('id', 'hospital', 'bill_code', 'bill_date', 'patient', 'admission')
+    list_display = ('id', 'account', 'bill_code', 'bill_date', 'patient', 'admission')
 
 class GeneralAdmin(admin.ModelAdmin):
     list_display = ('id', 'bill', 'item', 'amount')

@@ -24,7 +24,7 @@ class AppointmentView(APIView):
         serializer = AppointmentSaveSerializer(data=request.data)
         if serializer.is_valid():
             appointment = Appointment(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 patient=Patient.objects.get(id=request.data.get("patient_id")),
                 consultant=Doctor.objects.get(id=request.data.get("doctor_id")),
                 appointment_date=request.data.get("appointment_date"),
@@ -45,7 +45,7 @@ class AppointmentListView(generics.ListAPIView):
         queryset = Appointment.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class AppointmentDetailView(
@@ -75,7 +75,7 @@ class PatientListView(generics.ListAPIView):
         queryset = Patient.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class DoctorListView(generics.ListAPIView):
@@ -85,5 +85,5 @@ class DoctorListView(generics.ListAPIView):
         queryset = Doctor.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset

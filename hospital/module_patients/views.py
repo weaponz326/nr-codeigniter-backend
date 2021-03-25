@@ -22,7 +22,7 @@ class PatientView(APIView):
         serializer = PatientSerializer(data=request.data)
         if serializer.is_valid():
             patient = Patient(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
                 sex=request.data.get("sex"),
@@ -41,8 +41,12 @@ class PatientView(APIView):
                 insurance_number=request.data.get("insurance_number"),
             )
             patient.save()
+            latest_patient = Patient.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'patient_id': latest_patient.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -53,7 +57,7 @@ class PatientListView(generics.ListAPIView):
         queryset = Patient.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class PatientDetailView(

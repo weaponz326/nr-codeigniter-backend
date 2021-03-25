@@ -28,8 +28,12 @@ class WardView(APIView):
         serializer = WardSerializer(data=request.data)
         if serializer.is_valid():
             ward = Ward(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
-                first_name=request.data.get("first_name"),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
+                ward_number=request.data.get("ward_number"),
+                ward_name=request.data.get("ward_name"),
+                ward_type=request.data.get("ward_type"),
+                location=request.data.get("location"),
+                capacity=request.data.get("capacity"),
             )
             ward.save()
 
@@ -44,7 +48,7 @@ class WardListView(generics.ListAPIView):
         queryset = Ward.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class WardDetailView(
@@ -93,8 +97,12 @@ class WardPatientSaveView(APIView):
                 status=request.data.get("status")
             )
             patient.save()
+            latest_ward = Ward.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'ward_id': latest_ward.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -126,5 +134,5 @@ class PatientListView(generics.ListAPIView):
         queryset = Patient.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset

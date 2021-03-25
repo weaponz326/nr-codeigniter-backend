@@ -8,7 +8,6 @@ class DoctorSerializer(serializers.ModelSerializer):
         model = Doctor
         fields = [
             'id', 
-            'hospital', 
             'first_name',
             'last_name',
             'sex',
@@ -37,7 +36,6 @@ class DoctorListSerializer(serializers.ModelSerializer):
         model = Doctor
         fields = [
             'id', 
-            'hospital', 
             'doctor_name',
             'doctor_code',
             'speciality',

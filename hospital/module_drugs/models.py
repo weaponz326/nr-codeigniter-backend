@@ -6,7 +6,7 @@ from accounts.models import Profile
 # Create your models here.
 
 class Drug(models.Model):
-    hospital = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     ndc_number = models.CharField(max_length=50, blank=True)
     drug_name = models.CharField(max_length=100, blank=True)
     generic_name = models.CharField(max_length=100, blank=True)

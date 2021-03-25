@@ -22,7 +22,7 @@ class StockItemView(APIView):
         serializer = StockItemSerializer(data=request.data)
         if serializer.is_valid():
             menu = StockItem(
-                restaurant=Profile.objects.get(id=request.data.get("restaurant_id")),
+                account=Profile.objects.get(id=request.data.get("restaurant_id")),
                 item_code=request.data.get("item_code"),
                 item_name=request.data.get("item_name"),
                 category=request.data.get("category"),
@@ -43,7 +43,7 @@ class StockItemListView(generics.ListAPIView):
         queryset = StockItem.objects.all()
         restaurant = self.request.query_params.get('user', None)
         if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
+            queryset = queryset.filter(account=restaurant)
         return queryset
 
 class StockItemDetailView(

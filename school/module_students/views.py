@@ -42,8 +42,12 @@ class StudentView(APIView):
                 previous_school=request.data.get("previous_school"),
             )
             student.save()
+            latest_student = Student.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'student_id': latest_student.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 

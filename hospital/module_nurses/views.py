@@ -22,7 +22,7 @@ class NurseView(APIView):
         serializer = NurseSerializer(data=request.data)
         if serializer.is_valid():
             nurse = Nurse(
-                hospital=Profile.objects.get(id=request.data.get("hospital_id")),
+                account=Profile.objects.get(id=request.data.get("hospital_id")),
                 first_name=request.data.get("first_name"),
                 last_name=request.data.get("last_name"),
                 sex=request.data.get("sex"),
@@ -38,12 +38,16 @@ class NurseView(APIView):
                 nurse_code=request.data.get("nurse_code"),
                 department=request.data.get("department"),
                 work_status=request.data.get("work_status"),
-                stated_work=request.data.get("started_work"),
+                started_work=request.data.get("started_work"),
                 ended_work=request.data.get("ended_work"),
             )
             nurse.save()
+            latest_nurse = Nurse.objects.latest("id")
 
-            return Response({ 'status': True })
+            return Response({
+                'status': True,
+                'nurse_id': latest_nurse.id
+            })
         else:
             return Response({ 'status': False, 'errors': serializer.errors })
 
@@ -54,7 +58,7 @@ class NurseListView(generics.ListAPIView):
         queryset = Nurse.objects.all()
         hospital = self.request.query_params.get('user', None)
         if hospital is not None:
-            queryset = queryset.filter(hospital=hospital)
+            queryset = queryset.filter(account=hospital)
         return queryset
 
 class NurseDetailView(

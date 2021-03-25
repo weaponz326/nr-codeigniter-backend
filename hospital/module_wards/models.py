@@ -7,7 +7,7 @@ from module_patients.models import Patient
 # Create your models here.
 
 class Ward(models.Model):
-    hospital = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     ward_number = models.CharField(max_length=50, blank=True)
     ward_name = models.CharField(max_length=100, blank=True)
     ward_type = models.CharField(max_length=50, blank=True)

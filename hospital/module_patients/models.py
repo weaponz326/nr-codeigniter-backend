@@ -8,7 +8,7 @@ from accounts.models import Profile
 class Patient(models.Model):
     SEX_CHOICES = [('Male', 'Male'), ('Female', 'Female')]
 
-    hospital = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     sex = models.CharField(max_length=20, choices=SEX_CHOICES, blank=True)

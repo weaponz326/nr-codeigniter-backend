@@ -13,7 +13,7 @@ from module_deliveries.models import Delivery
 # Create your models here.
 
 class Bill(models.Model):
-    restaurant = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True)
     sitting = models.ForeignKey(Sitting, on_delete=models.CASCADE, null=True, blank=True)
     delivery = models.ForeignKey(Delivery, on_delete=models.CASCADE, null=True, blank=True)

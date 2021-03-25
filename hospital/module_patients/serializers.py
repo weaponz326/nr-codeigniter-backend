@@ -8,7 +8,6 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = [
             'id', 
-            'hospital', 
             'first_name',
             'last_name',
             'sex',
@@ -35,7 +34,6 @@ class PatientListSerializer(serializers.ModelSerializer):
         model = Patient
         fields = [
             'id', 
-            'hospital', 
             'patient_name',
             'sex',
             'phone',
