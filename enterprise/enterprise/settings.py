@@ -43,6 +43,21 @@ INSTALLED_APPS = [
 
     'accounts',
     'module_admin',
+    'module_accounts',
+    'module_payroll',
+    'module_attendance',
+    'module_assets',
+    'module_leave',
+    'module_budget',
+    'module_procurement',
+    'module_letters',
+    'module_appraisal',
+    'module_files',
+    'module_employees',
+    'module_ledger',
+    'module_reception',
+    'module_portal',
+    'module_settings',
 ]
 
 MIDDLEWARE = [
@@ -125,6 +140,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# change default date time format
+DATETIME_FORMAT = 'Y-m-d H:M:S'
 
 
 # cors settings

@@ -140,6 +140,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+# change default date time format
+DATETIME_FORMAT = 'Y-m-d H:M:S'
+
+
 # cors settings
 
 CORS_ORIGIN_ALLOW_ALL = True

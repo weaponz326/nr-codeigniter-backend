@@ -30,7 +30,7 @@ class Access(models.Model):
     payments_access = models.BooleanField(default=False)
     portal_access = models.BooleanField(default=False)
     prescriptions_access = models.BooleanField(default=False)
-    settings_access = models.BooleanField(default=False)
+    sittings_access = models.BooleanField(default=False)
     settings_access = models.BooleanField(default=False)
     staff_access = models.BooleanField(default=False)
     wards_access = models.BooleanField(default=False)
