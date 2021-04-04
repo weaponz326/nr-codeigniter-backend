@@ -23,4 +23,6 @@ urlpatterns = [
     
     path('accounts/', include('accounts.urls')),
     path('module-admin/', include('module_admin.urls')),
+    path('module-portal/', include('module_portal.urls')),
+    path('module-settings/', include('module_settings.urls')),
 ]

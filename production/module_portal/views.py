@@ -7,13 +7,13 @@ from rest_framework import filters
 
 from .models import Rink
 from accounts.models import Profile
-from module_staff.models import Staff
-from module_customers.models import Customer
-from module_menu.models import MenuItem
+# from module_staff.models import Staff
+# from module_customers.models import Customer
+# from module_menu.models import MenuItem
 from .serializers import RinkSerializer, ProfileSerializer, RinkDetailSerializer
-from module_staff.serializers import StaffSerializer
-from module_customers.serializers import CustomerSerializer
-from module_menu.serializers import MenuItemSerializer
+# from module_staff.serializers import StaffSerializer
+# from module_customers.serializers import CustomerSerializer
+# from module_menu.serializers import MenuItemSerializer
 
 
 # Create your views here.
