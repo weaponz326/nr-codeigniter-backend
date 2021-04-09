@@ -43,6 +43,18 @@ INSTALLED_APPS = [
 
     'accounts',
     'module_admin',
+    'module_bills',
+    'module_staff',
+    'module_guests',
+    'module_payments',
+    'module_services',
+    'module_checkin',
+    'module_bookings',
+    'module_rooms',
+    'module_assets',
+    'module_housekeeping',
+    'module_portal',
+    'module_settings',
 ]
 
 MIDDLEWARE = [

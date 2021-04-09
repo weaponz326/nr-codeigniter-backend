@@ -23,6 +23,16 @@ urlpatterns = [
     
     path('accounts/', include('accounts.urls')),
     path('module-admin/', include('module_admin.urls')),
+    path('module-bills/', include('module_bills.urls')),
+    path('module-staff/', include('module_staff.urls')),
+    path('module-guests/', include('module_guests.urls')),
+    path('module-payments/', include('module_payments.urls')),
+    path('module-services/', include('module_services.urls')),
+    path('module-checkin/', include('module_checkin.urls')),
+    path('module-bookings/', include('module_bookings.urls')),
+    path('module-rooms/', include('module_rooms.urls')),
+    path('module-assets/', include('module_assets.urls')),
+    path('module-housekeeping/', include('module_housekeeping.urls')),
     path('module-portal/', include('module_portal.urls')),
     path('module-settings/', include('module_settings.urls')),
 ]

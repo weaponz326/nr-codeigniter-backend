@@ -43,6 +43,8 @@ INSTALLED_APPS = [
 
     'accounts',
     'module_admin',
+    'module_portal',
+    'module_settings',
 ]
 
 MIDDLEWARE = [
