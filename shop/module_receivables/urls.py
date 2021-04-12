@@ -1,0 +1,9 @@
+from django.urls import path, include
+from . import views
+
+
+urlpatterns = [
+    path('receivable/', views.ReceivableView.as_view()),
+    path('receivable-list/', views.ReceivableListView.as_view()),
+    path('receivable/<int:pk>', views.ReceivableDetailView.as_view()),
+]
