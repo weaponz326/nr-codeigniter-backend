@@ -23,6 +23,18 @@ urlpatterns = [
     
     path('accounts/', include('accounts.urls')),
     path('module-admin/', include('module_admin.urls')),
+    path('module-stock/', include('module_stock.urls')),
+    path('module-equipment/', include('module_equipment.urls')),
+    path('module-purchasing/', include('module_purchasing.urls')),
+    path('module-orders/', include('module_orders.urls')),
+    path('module-manufacturing/', include('module_manufacturing.urls')),
+    path('module-contractors/', include('module_contractors.urls')),
+    # path('module-projects/', include('module_projects.urls')),
+    path('module-workers/', include('module_workers.urls')),
+    # path('module-tasks/', include('module_tasks.urls')),
+    path('module-products/', include('module_products.urls')),
+    # path('module-schedules/', include('module_schedules.urls')),
+    path('module-materials/', include('module_materials.urls')),
     path('module-portal/', include('module_portal.urls')),
     path('module-settings/', include('module_settings.urls')),
 ]

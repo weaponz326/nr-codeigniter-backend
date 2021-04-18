@@ -43,6 +43,18 @@ INSTALLED_APPS = [
 
     'accounts',
     'module_admin',
+    'module_stock',
+    'module_equipment',
+    'module_purchasing',
+    'module_orders',
+    'module_manufacturing',
+    'module_contractors',
+    'module_projects',
+    'module_workers',
+    'module_tasks',
+    'module_products',
+    'module_schedules',
+    'module_materials',
     'module_portal',
     'module_settings',
 ]
