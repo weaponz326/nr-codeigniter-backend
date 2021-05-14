@@ -3,119 +3,87 @@ from django.contrib.auth.models import User
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Account, Transaction
-from .serializers import AccountSerializer, TransactionSerializer, UserTransactionSerializer
+from .serializers import AccountSerializer, TransactionSerializer
 
 
 # Create your views here.
 
 class AccountView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = AccountSerializer
-        queryset = Account.objects.all()
+    def get(self, request, format=None):
+        user = self.request.query_params.get('user', None)
+        account = Account.objects.filter(user=user)
+        serializer = AccountSerializer(account, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = AccountSerializer(data=request.data)
         if serializer.is_valid():
-            account = Account(
-                user=User.objects.get(id=request.data.get("user")),
-                account_name=request.data.get("account_name"),
-                account_number=request.data.get("account_number"),
-                bank_name=request.data.get("bank_name")
-            )
-            account.save()
-            latest_account = Account.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'account_id': latest_account.id
-            })
-        else:
-            return Response({ 'status': False })
+class AccountDetailView(APIView):
+    def get(self, request, pk, format=None):
+        account = Account.objects.get(pk=pk)
+        serializer = AccountSerializer(account)
+        return Response(serializer.data)
 
-class AccountListView(generics.ListAPIView):
-    serializer_class = AccountSerializer
+    def put(self, request, pk, format=None):
+        account = Account.objects.get(pk=pk)
+        serializer = AccountSerializer(account, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Account.objects.all()
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            queryset = queryset.filter(user=user)
-        return queryset
+    def delete(self, request, pk, format=None):
+        account = Account.objects.get(pk=pk)
+        account.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class AccountDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
+# ---------------------------------------------------------------------------------------------------------
 # transactions
 
-class TransactionListView(generics.ListAPIView):
-    serializer_class = TransactionSerializer
-
-    def get_queryset(self):
-        queryset = Transaction.objects.all()
+class TransactionView(APIView):
+    def get(self, request, format=None):
         account = self.request.query_params.get('account', None)
-        if account is not None:
-            queryset = queryset.filter(account=account)
-        return queryset
+        transaction = Transaction.objects.filter(account=account)
+        serializer = TransactionSerializer(transaction, many=True)        
+        return Response(serializer.data)
 
-class TransactionView(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    generics.GenericAPIView):
-    
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
+    def post(self, request, format=None):
+        serializer = TransactionSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-    
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+class TransactionDetailView(APIView):
+    def get(self, request, pk, format=None):
+        transaction = Transaction.objects.get(pk=pk)
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data)
 
-class TransactionDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+    def put(self, request, pk, format=None):
+        transaction = Transaction.objects.get(pk=pk)
+        serializer = TransactionSerializer(transaction, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        transaction = Transaction.objects.get(pk=pk)
+        transaction.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # all transactions
-class AllTransactionsView(generics.ListAPIView):
-    serializer_class = UserTransactionSerializer
-
-    def get_queryset(self):
-        queryset = Transaction.objects.all()
+class AllTransactionsView(APIView):
+    def get(self, request, format=None):
         user = self.request.query_params.get('user', None)
-        if user is not None:
-            queryset = queryset.filter(account__user=user)
-        return queryset
+        account = Transaction.objects.filter(account__user=user)
+        serializer = TransactionSerializer(account, many=True)        
+        return Response(serializer.data)

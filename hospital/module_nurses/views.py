@@ -2,79 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Nurse
-from accounts.models import Profile
 from .serializers import NurseSerializer, NurseListSerializer
 
 
 # Create your views here.
 
 class NurseView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = NurseSerializer
-        queryset = Nurse.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        nurse = Nurse.objects.filter(account=account)
+        serializer = NurseListSerializer(nurse, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = NurseSerializer(data=request.data)
         if serializer.is_valid():
-            nurse = Nurse(
-                account=Profile.objects.get(id=request.data.get("hospital_id")),
-                first_name=request.data.get("first_name"),
-                last_name=request.data.get("last_name"),
-                sex=request.data.get("sex"),
-                date_of_birth=request.data.get("date_of_birth"),
-                nationality=request.data.get("nationality"),
-                religion=request.data.get("religion"),
-                phone=request.data.get("phone"),
-                email=request.data.get("email"),
-                address=request.data.get("address"),
-                state=request.data.get("state"),
-                city=request.data.get("city"),
-                post_code=request.data.get("post_code"),
-                nurse_code=request.data.get("nurse_code"),
-                department=request.data.get("department"),
-                work_status=request.data.get("work_status"),
-                started_work=request.data.get("started_work"),
-                ended_work=request.data.get("ended_work"),
-            )
-            nurse.save()
-            latest_nurse = Nurse.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'nurse_id': latest_nurse.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class NurseDetailView(APIView):
+    def get(self, request, pk, format=None):
+        nurse = Nurse.objects.get(pk=pk)
+        serializer = NurseSerializer(nurse)
+        return Response(serializer.data)
 
-class NurseListView(generics.ListAPIView):
-    serializer_class = NurseListSerializer
+    def put(self, request, pk, format=None):
+        nurse = Nurse.objects.get(pk=pk)
+        serializer = NurseSerializer(nurse, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Nurse.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
-
-class NurseDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Nurse.objects.all()
-    serializer_class = NurseSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        nurse = Nurse.objects.get(pk=pk)
+        nurse.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

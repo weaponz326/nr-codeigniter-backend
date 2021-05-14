@@ -5,6 +5,6 @@ from .models import Payment
 # Register your models here.
 
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'account', 'payment_code', 'payment_date', 'bill', 'amount_paid', 'balance')
+    list_display = ('id', 'account', 'payment_code', 'payment_date', 'bill', 'amount_paid')
 
 admin.site.register(Payment, PaymentAdmin)

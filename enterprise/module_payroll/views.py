@@ -2,9 +2,8 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
-from accounts.models import Profile
 from .models import Payroll
 from .serializers import PayrollSerializer
 
@@ -12,57 +11,34 @@ from .serializers import PayrollSerializer
 # Create your views here.
 
 class PayrollView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = PayrollSerializer
-        queryset = Payroll.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        payroll = Payroll.objects.filter(account=account)
+        serializer = PayrollSerializer(payroll, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = PayrollSerializer(data=request.data)
         if serializer.is_valid():
-            payroll = Payroll(
-                payroll=Profile.objects.get(id=request.data.get("enterprise_id")),
-                payroll_name=request.data.get("payroll_name"),
-                payroll_status=request.data.get("payroll_status"),
-                date_generated=request.data.get("date_generated"),
-                month=request.data.get("month"),
-                year=request.data.get("year"),
-            )
-            payroll.save()
-            latest_payroll = Payroll.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'payroll_id': latest_payroll.id
-            })
-        else:
-            return Response({ 'status': False })
+class PayrollDetailView(APIView):
+    def get(self, request, pk, format=None):
+        payroll = Payroll.objects.get(pk=pk)
+        serializer = PayrollSerializer(payroll)
+        return Response(serializer.data)
 
-class PayrollListView(generics.ListAPIView):
-    serializer_class = PayrollSerializer
+    def put(self, request, pk, format=None):
+        payroll = Payroll.objects.get(pk=pk)
+        serializer = PayrollSerializer(payroll, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Payroll.objects.all()
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            queryset = queryset.filter(user=user)
-        return queryset
-
-class PayrollDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Payroll.objects.all()
-    serializer_class = PayrollSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        payroll = Payroll.objects.get(pk=pk)
+        payroll.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

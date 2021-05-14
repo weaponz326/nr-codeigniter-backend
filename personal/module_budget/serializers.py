@@ -4,14 +4,14 @@ from .models import Budget, Income, Expenditure
 class BudgetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Budget
-        fields = ['id', 'user', 'budget_name', 'budget_type', 'created_at']
+        fields = '__all__'
 
 class IncomeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Income
-        fields = ['id', 'budget', 'item', 'amount']
+        fields = '__all__'
 
 class ExpenditureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expenditure
-        fields = ['id', 'budget', 'item', 'amount']
+        fields = '__all__'

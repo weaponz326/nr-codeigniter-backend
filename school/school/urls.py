@@ -33,9 +33,10 @@ urlpatterns = [
     path('module-terms/', include('module_terms.urls')),
     path('module-staff/', include('module_staff.urls')),
     path('module-classes/', include('module_classes.urls')),
-    # path('module-fees/', include('module_fees.urls')),
+    path('module-fees/', include('module_fees.urls')),
     path('module-teachers/', include('module_teachers.urls')),
     path('module-settings/', include('module_settings.urls')),
-    # path('module-payments/', include('module_payments.urls')),
+    path('module-payments/', include('module_payments.urls')),
     path('module-timetables/', include('module_timetables.urls')),
+    path('module-sections/', include('module_sections.urls')),
 ]

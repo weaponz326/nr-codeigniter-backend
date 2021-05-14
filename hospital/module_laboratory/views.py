@@ -2,109 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
-from .models import Laboratory
-from accounts.models import Profile
-from module_patients.models import Patient
-from module_doctors.models import Doctor
-from .serializers import LaboratorySerializer, LaboratorySaveSerializer, PatientSerializer, DoctorSerializer
+from .models import Laboratory, Attachment
+from .serializers import LaboratorySerializer, LaboratoryListSerializer
 
 
 # Create your views here.
 
-# create a new lab for the firat time with only the lab fields
-class NewLaboratoryView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = LaboratorySaveSerializer(data=request.data)
-        if serializer.is_valid():
-            lab = Laboratory(
-                account=Profile.objects.get(id=request.data.get("hospital_id")),
-                lab_code=request.data.get("lab_code"),
-                lab_date=request.data.get("lab_date"),
-                lab_type=request.data.get("lab_type"),
-            )
-            lab.save()
-            latest_lab = Laboratory.objects.latest("id")
-
-            return Response({
-                'status': True,
-                'lab_id': latest_lab.id
-            })
-        else:
-            return Response({ 'status': False })
-
 class LaboratoryView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = LaboratorySerializer
-        queryset = Laboratory.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        laboratory = Laboratory.objects.filter(account=account)
+        serializer = LaboratoryListSerializer(laboratory, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = LaboratorySaveSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = LaboratorySerializer(data=request.data)
         if serializer.is_valid():
-            lab = Laboratory(
-                account=Profile.objects.get(id=request.data.get("hospital_id")),
-                patient=Patient.objects.get(id=request.data.get("patient_id")),
-                doctor=Doctor.objects.get(id=request.data.get("doctor_id")),
-                lab_code=request.data.get("lab_code"),
-                lab_type=request.data.get("lab_type"),
-                lab_date=request.data.get("lab_date"),
-            )
-            lab.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class LaboratoryDetailView(APIView):
+    def get(self, request, pk, format=None):
+        laboratory = Laboratory.objects.get(pk=pk)
+        serializer = LaboratoryListSerializer(laboratory)
+        return Response(serializer.data)
 
-class LaboratoryListView(generics.ListAPIView):
-    serializer_class = LaboratorySerializer
+    def put(self, request, pk, format=None):
+        laboratory = Laboratory.objects.get(pk=pk)
+        serializer = LaboratorySerializer(laboratory, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Laboratory.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
+    def delete(self, request, pk, format=None):
+        laboratory = Laboratory.objects.get(pk=pk)
+        laboratory.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class LaboratoryDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+# ------------------------------------------------------------------------------------------------
+# files
 
-    queryset = Laboratory.objects.all()
-    serializer_class = LaboratorySaveSerializer
+class AttachmentView(APIView):
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        attachment = Attachment.objects.filter(account=account)
+        serializer = AttachmentListSerializer(attachment, many=True)        
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def post(self, request, format=None):
+        serializer = AttachmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+class AttachmentDetailView(APIView):
+    def get(self, request, pk, format=None):
+        attachment = Attachment.objects.get(pk=pk)
+        serializer = AttachmentListSerializer(attachment)
+        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        attachment = Attachment.objects.get(pk=pk)
+        serializer = AttachmentSerializer(attachment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-# patient and doctor select grid list
-# --------------------------------------------------------------------------------------------------
-
-class PatientListView(generics.ListAPIView):
-    serializer_class = PatientSerializer
-
-    def get_queryset(self):
-        queryset = Patient.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
-
-class DoctorListView(generics.ListAPIView):
-    serializer_class = DoctorSerializer
-
-    def get_queryset(self):
-        queryset = Doctor.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
+    def delete(self, request, pk, format=None):
+        attachment = Attachment.objects.get(pk=pk)
+        attachment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

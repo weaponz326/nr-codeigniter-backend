@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'module_settings',
     'module_payments',
     'module_timetables',
+    'module_sections',
 ]
 
 MIDDLEWARE = [

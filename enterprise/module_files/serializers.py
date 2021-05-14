@@ -6,9 +6,9 @@ from .models import Folder, File
 class FolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Folder
-        fields = ['id', 'folder_number', 'folder_name', 'date_created', 'last_updated']
+        fields = '__all__'
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ['id', 'file_number', 'file_name', 'date_created']
+        fields = '__all__'

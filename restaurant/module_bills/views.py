@@ -2,133 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Bill
-from accounts.models import Profile
-from module_orders.models import Order
-from module_sittings.models import Sitting
-from module_deliveries.models import Delivery
-from .serializers import (
-    BillSerializer, 
-    BillSaveSerializer, 
-    OrderSerializer,
-    SittingSerializer,
-    DeliverySerializer
-)
+from .serializers import BillSerializer
 
 
 # Create your views here.
 
-# create a new bill for the first time
-class NewBillView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = BillSaveSerializer(data=request.data)
-        if serializer.is_valid():
-            bill = Bill(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                order=Order.objects.get(id=request.data.get("order_id")),
-                sitting=Sitting.objects.get(id=request.data.get("sitting_id")),
-                delivery=Delivery.objects.get(id=request.data.get("delivery_id")),
-                bill_code=request.data.get("bill_code"),
-                bill_date=request.data.get("bill_date"),
-                bill_type=request.data.get("bill_type"),
-                customer_name=request.data.get("customer_name"),
-            )
-            bill.save()
-            latest_bill = Bill.objects.latest("id")
-
-            return Response({
-                'status': True,
-                'bill_id': latest_bill.id
-            })
-        else:
-            return Response({ 'status': False })
-
 class BillView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = BillSerializer
-        queryset = Bill.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        bill = Bill.objects.filter(account=account)
+        serializer = BillSerializer(bill, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = BillSaveSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = BillSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            bill = Bill(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                order=Order.objects.get(id=request.data.get("order_id")),
-                sitting=Sitting.objects.get(id=request.data.get("sitting_id")),
-                delivery=Delivery.objects.get(id=request.data.get("delivery_id")),
-                bill_code=request.data.get("bill_code"),
-                bill_date=request.data.get("bill_date"),
-                bill_type=request.data.get("bill_type"),
-                customer_name=request.data.get("customer_name"),
-            )
-            bill.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class BillDetailView(APIView):
+    def get(self, request, pk, format=None):
+        bill = Bill.objects.get(pk=pk)
+        serializer = BillSerializer(bill)
+        return Response(serializer.data)
 
-class BillListView(generics.ListAPIView):
-    serializer_class = BillSerializer
+    def put(self, request, pk, format=None):
+        bill = Bill.objects.get(pk=pk)
+        serializer = BillSerializer(bill, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Bill.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
-class BillDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Bill.objects.all()
-    serializer_class = BillSaveSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# order, sitting, delivery select grid list
-# --------------------------------------------------------------------------------------------------
-
-class OrderListView(generics.ListAPIView):
-    serializer_class = OrderSerializer
-
-    def get_queryset(self):
-        queryset = Order.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
-class SittingListView(generics.ListAPIView):
-    serializer_class = SittingSerializer
-
-    def get_queryset(self):
-        queryset = Sitting.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
-class DeliveryListView(generics.ListAPIView):
-    serializer_class = DeliverySerializer
-
-    def get_queryset(self):
-        queryset = Delivery.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
+    def delete(self, request, pk, format=None):
+        bill = Bill.objects.get(pk=pk)
+        bill.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

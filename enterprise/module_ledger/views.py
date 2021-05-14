@@ -2,10 +2,9 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Ledger, LedgerItem
-from accounts.models import Profile
 from .serializers import LedgerSerializer, LedgerItemSerializer
 
 
@@ -14,113 +13,70 @@ from .serializers import LedgerSerializer, LedgerItemSerializer
 # ledger
 
 class LedgerView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = LedgerSerializer
-        queryset = Ledger.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        ledger = Ledger.objects.filter(account=account)
+        serializer = LedgerSerializer(ledger, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = LedgerSerializer(data=request.data)
         if serializer.is_valid():
-            ledger = Ledger(
-                account=Profile.objects.get(id=request.data.get("enteprise_id")),
-                ledger_code=request.data.get("ledger_code"),
-                ledger_date=request.data.get("ledger_date"),
-                ledger_name=request.data.get("ledger_name"),
-                from_date=request.data.get("from_date"),
-                to_date=request.data.get("to_date"),
-            )
-            ledger.save()
-            latest_ledger = Ledger.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'ledger_id': latest_ledger.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class LedgerDetailView(APIView):
+    def get(self, request, pk, format=None):
+        ledger = Ledger.objects.get(pk=pk)
+        serializer = LedgerSerializer(ledger)
+        return Response(serializer.data)
 
-class LedgerListView(generics.ListAPIView):
-    serializer_class = LedgerSerializer
+    def put(self, request, pk, format=None):
+        ledger = Ledger.objects.get(pk=pk)
+        serializer = LedgerSerializer(ledger, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Ledger.objects.all()
-        enterprise = self.request.query_params.get('user', None)
-        if enterprise is not None:
-            queryset = queryset.filter(account=enterprise)
-        return queryset
+    def delete(self, request, pk, format=None):
+        ledger = Ledger.objects.get(pk=pk)
+        ledger.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class LedgerDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Ledger.objects.all()
-    serializer_class = LedgerSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# ------------------------------------------------------------------------------------
-
+# ------------------------------------------------------------------------------------------------------
 # ledger items
 
 class LedgerItemView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = LedgerItemSerializer
-        queryset = LedgerItem.objects.all()
+    def get(self, request, format=None):
+        ledger = self.request.query_params.get('ledger', None)
+        item = LedgerItem.objects.filter(ledger=ledger)
+        serializer = LedgerItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = LedgerItemSerializer(data=request.data)
         if serializer.is_valid():
-            item = LedgerItem(
-                ledger=Ledger.objects.get(id=request.data.get("ledger")),
-                item_date=request.data.get("item_date"),
-                reference=request.data.get("reference"),
-                item_type=request.data.get("item_type"),
-                details=request.data.get("details"),
-                amount=request.data.get("amount"),
-            )
-            item.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class LedgerItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = LedgerItem.objects.get(pk=pk)
+        serializer = LedgerItemSerializer(item)
+        return Response(serializer.data)
 
-class LedgerItemListView(generics.ListAPIView):
-    serializer_class = LedgerItemSerializer
+    def put(self, request, pk, format=None):
+        item = LedgerItem.objects.get(pk=pk)
+        serializer = LedgerItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = LedgerItem.objects.all()
-        ledger = self.request.query_params.get('ledger', None)
-        if ledger is not None:
-            queryset = queryset.filter(ledger=ledger)
-        return queryset
-
-class LedgerItemDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = LedgerItem.objects.all()
-    serializer_class = LedgerItemSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        item = LedgerItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

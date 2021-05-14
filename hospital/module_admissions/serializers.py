@@ -1,33 +1,20 @@
 from rest_framework import serializers
 
 from .models import Admission
-from module_patients.models import Patient
-from module_doctors.models import Doctor
+from module_patients.serializers import PatientListSerializer
 
-
-# patient to be merged into admission serializer
-
-class PatientSerializer(serializers.ModelSerializer):
-    patient_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Patient
-        fields = ['id', 'patient_name', 'clinical_number']
-
-    def get_patient_name(self, obj):
-        return '{} {}'.format(obj.first_name, obj.last_name) 
 
 class AdmissionSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer()
 
     class Meta:
         model = Admission
-        fields = ['id', 'patient', 'admission_code', 'admission_date', 'discharge_date', 'admission_status']
+        fields = '__all__'
 
-# for saving admission patient ids
-# to prevent saving with dictionary        
-class AdmissionSaveSerializer(serializers.ModelSerializer):
+class AdmissionListSerializer(serializers.ModelSerializer):
+    # contains serializer method field
+    patient = PatientListSerializer()
 
     class Meta:
         model = Admission
-        fields = ['id', 'patient', 'admission_code', 'admission_date', 'discharge_date', 'admission_status']
+        fields = '__all__'
+        depth = 1

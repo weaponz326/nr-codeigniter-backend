@@ -2,153 +2,78 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
-from .models import Dispensary, Detail
-from accounts.models import Profile
-from module_prescriptions.models import Prescription
-from .serializers import (
-    DispensarySerializer, 
-    DispensarySaveSerializer, 
-    DetailSerializer, 
-    DetailSaveSerializer, 
-    PrescriptionSerializer
-)
+from .models import Dispensary, DispensaryDrug
+from .serializers import DispensarySerializer, DispensaryListSerializer, DispensaryDrugSerializer
 
 # Create your views here.
 
-# create a new dispensary for the first time
-class NewDispensaryView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = DispensarySaveSerializer(data=request.data)
-        if serializer.is_valid():
-            dispensary = Dispensary(
-                account=Profile.objects.get(id=request.data.get("hospital_id")),
-                dispense_code=request.data.get("dispense_code"),
-                dispense_date=request.data.get("dispense_date"),
-            )
-            dispensary.save()
-            latest_dispensary = Dispensary.objects.latest("id")
-
-            return Response({
-                'status': True,
-                'dispensary_id': latest_dispensary.id
-            })
-        else:
-            return Response({ 'status': False })
-
 class DispensaryView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = DispensarySerializer
-        queryset = Dispensary.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        dispensary = Dispensary.objects.filter(account=account)
+        serializer = DispensaryListSerializer(dispensary, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = DispensarySaveSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = DispensarySerializer(data=request.data)
         if serializer.is_valid():
-            dispensary = Dispensary(
-                account=Profile.objects.get(id=request.data.get("hospital_id")),
-                prescription=Prescripton.objects.get(id=request.data.get("prescription_id")),
-                dispensary_code=request.data.get("dispensary_code"),
-                dispensary_date=request.data.get("dispensary_date"),
-            )
-            dispensary.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class DispensaryDetailView(APIView):
+    def get(self, request, pk, format=None):
+        dispensary = Dispensary.objects.get(pk=pk)
+        serializer = DispensaryListSerializer(dispensary)
+        return Response(serializer.data)
 
-class DispensaryListView(generics.ListAPIView):
-    serializer_class = DispensarySerializer
-
-    def get_queryset(self):
-        queryset = Dispensary.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
-
-class DispensaryDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Dispensary.objects.all()
-    serializer_class = DispensarySaveSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# dispensary details
-# ----------------------------------------------------------------------------------------------------------
-
-class DetailView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = DetailSerializer
-        queryset = Detail.objects.all()
-
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = DetailSaveSerializer(data=request.data)
+    def put(self, request, pk, format=None):
+        dispensary = Dispensary.objects.get(pk=pk)
+        serializer = DispensarySerializer(dispensary, data=request.data)
         if serializer.is_valid():
-            detail = Detail(
-                dispensary=Dispensary.objects.get(id=request.data.get("dispensary_id")),
-                drug=request.data.get("drug"),
-                remarks=request.data.get("remarks")
-            )
-            drug.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+    def delete(self, request, pk, format=None):
+        dispensary = Dispensary.objects.get(pk=pk)
+        dispensary.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class DetailListView(generics.ListAPIView):
-    serializer_class = DetailSerializer
+# dispensary drugs
+# -----------------------------------------------------------------------------------------------------------
 
-    def get_queryset(self):
-        queryset = Drug.objects.all()
+class DispensaryDrugView(APIView):
+    def get(self, request, format=None):
         dispensary = self.request.query_params.get('dispensary', None)
-        if dispensary is not None:
-            queryset = queryset.filter(dispensary=dispensary)
-        return queryset
+        drug = DispensaryDrug.objects.filter(dispensary=dispensary)
+        serializer = DispensaryDrugSerializer(drug, many=True)        
+        return Response(serializer.data)
 
-class DetailDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+    def post(self, request, format=None):
+        serializer = DispensaryDrugSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    queryset = Detail.objects.all()
-    serializer_class = DetailSaveSerializer
+class DispensaryDrugDetailView(APIView):
+    def get(self, request, pk, format=None):
+        drug = DispensaryDrug.objects.get(pk=pk)
+        serializer = DispensaryDrugSerializer(drug)
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        drug = DispensaryDrug.objects.get(pk=pk)
+        serializer = DispensaryDrugSerializer(drug, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# prescription select grid list
-# --------------------------------------------------------------------------------------------------
-
-class PrescriptionListView(generics.ListAPIView):
-    serializer_class = PrescriptionSerializer
-
-    def get_queryset(self):
-        queryset = Prescription.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
-
+    def delete(self, request, pk, format=None):
+        drug = DispensaryDrug.objects.get(pk=pk)
+        drug.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

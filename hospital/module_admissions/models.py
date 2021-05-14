@@ -10,8 +10,8 @@ class Admission(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     admission_code = models.CharField(max_length=50, blank=True)
-    admission_date = models.DateField(null=True, blank=True)
-    discharge_date = models.DateField(null=True, blank=True)
+    admission_date = models.DateTimeField(null=True, blank=True)
+    discharge_date = models.DateTimeField(null=True, blank=True)
     admission_status = models.CharField(max_length=50, blank=True)
 
     def __str__(self):

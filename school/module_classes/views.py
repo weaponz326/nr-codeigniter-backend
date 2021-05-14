@@ -5,85 +5,76 @@ from rest_framework.views import APIView
 from rest_framework import generics, mixins
 
 from .models import Class, ClassSubject
-from accounts.models import Profile
-from module_subjects.models import Subject
-from .serializers import ClassSerializer, SubjectSerializer, ClassSubjectSerializer, ClassSubjectListSerializer
+from .serializers import ClassSerializer, ClassListSerializer, ClassSubjectSerializer
 
 
 # Create your views here.
 
 class ClassView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ClassSerializer
-        queryset = Class.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        clas = Class.objects.filter(account=account)
+        serializer = ClassListSerializer(clas, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ClassSerializer(data=request.data)
         if serializer.is_valid():
-            clas = Class(
-                account=Profile.objects.get(id=request.data.get("school_id")),
-                class_name=request.data.get("class_name"),
-                department=request.data.get("department"),
-                location=request.data.get("location"),
-            )
-            clas.save()
-            latest_class = Classes.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'class_id': latest_class.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ClassDetailView(APIView):
+    def get(self, request, pk, format=None):
+        clas = Class.objects.get(pk=pk)
+        serializer = ClassListSerializer(clas)
+        return Response(serializer.data)
 
-class ClassListView(generics.ListAPIView):
-    serializer_class = ClassSerializer
+    def put(self, request, pk, format=None):
+        clas = Class.objects.get(pk=pk)
+        serializer = ClassSerializer(clas, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Class.objects.all()
-        school = self.request.query_params.get('user', None)
-        if school is not None:
-            queryset = queryset.filter(account=school)
-        return queryset
+    def delete(self, request, pk, format=None):
+        clas = Class.objects.get(pk=pk)
+        clas.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class ClassDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+# class subjects
+# -------------------------------------------------------------------------------------------------------------------
 
-    queryset = Class.objects.all()
-    serializer_class = ClassSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# class' subjects
-
-class ClassSubjectListView(generics.ListAPIView):
-    serializer_class = ClassSubjectListSerializer
-
-    def get_queryset(self):
-        queryset = ClassSubject.objects.all()
+class ClassSubjectView(APIView):
+    def get(self, request, format=None):
         clas = self.request.query_params.get('clas', None)
-        if clas is not None:
-            queryset = queryset.filter(clas=clas)
-        return queryset
+        subject = ClassSubject.objects.filter(clas=clas)
+        serializer = ClassSubjectSerializer(subject, many=True)        
+        return Response(serializer.data)
 
-class AllSubjectListView(generics.ListAPIView):
-    serializer_class = SubjectSerializer
+    def post(self, request, format=None):
+        serializer = ClassSubjectSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Subject.objects.all()
-        school = self.request.query_params.get('user', None)
-        if school is not None:
-            queryset = queryset.filter(account=school)
-        return queryset
+class ClassSubjectDetailView(APIView):
+    def get(self, request, pk, format=None):
+        subject = ClassSubject.objects.get(pk=pk)
+        serializer = ClassSubjectSerializer(subject)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        subject = ClassSubject.objects.get(pk=pk)
+        serializer = ClassSubjectSerializer(subject, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        subject = ClassSubject.objects.get(pk=pk)
+        subject.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

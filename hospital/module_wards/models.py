@@ -21,8 +21,8 @@ class WardPatient(models.Model):
     ward = models.ForeignKey(Ward, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     bed_number = models.CharField(max_length=20, blank=True)
-    date_admitted = models.DateField(null=True, blank=True)
-    date_discharged = models.DateField(null=True, blank=True)
+    date_admitted = models.DateTimeField(null=True, blank=True)
+    date_discharged = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=50, blank=True)
 
     def __str__(self):

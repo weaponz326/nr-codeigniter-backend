@@ -18,7 +18,7 @@ class File(models.Model):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     file_name = models.CharField(max_length=100, null=True)
     file_number = models.CharField(max_length=50, null=True)
-    date_created = models.DateField(auto_now_add=True, blank=True, null=True)
+    date_added = models.DateField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return str(self.id)

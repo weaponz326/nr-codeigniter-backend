@@ -1,29 +1,13 @@
 from rest_framework import serializers
 
 from .models import Parent, ParentWard
-from module_students.models import Student
-from module_classes.models import Class
+from module_students.serializers import StudentListSerializer
 
 
 class ParentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parent
-        fields = [
-            'id', 
-            'parent_code', 
-            'first_name',
-            'last_name',
-            'sex',
-            'nationality',
-            'religion',
-            'occupation',
-            'phone',
-            'email',
-            'address',
-            'state',
-            'city',
-            'post_code',
-        ]
+        fields = '__all__'
 
 # merges first name and last name
 class ParentListSerializer(serializers.ModelSerializer):
@@ -31,51 +15,21 @@ class ParentListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Parent
-        fields = ['id', 'account', 'parent_code', 'parent_name', 'phone']
+        fields = '__all__'
 
     def get_parent_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 
 
-# students serializer
-# all students in a school
-
-class StudentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Student
-        fields = ['id', 'first_name', 'last_name', 'student_code']
-
-# merge student with class
-class ClassSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Class
-        fields = ['id', 'class_name']
-
-# combine first name and last name
-class StudentListSerializer(serializers.ModelSerializer):
-    clas = ClassSerializer()
-    student_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Student
-        fields = ['id', 'account', 'student_code', 'student_name', 'clas']
-
-    def get_student_name(self, obj):
-        return '{} {}'.format(obj.first_name, obj.last_name) 
-
-# parent's wards
-# only wards belonging to a parent
 
 class ParentWardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParentWard
-        fields = ['id']
-
-# merge student - class combo with parent
+        fields = '__all__'
 
 class ParentWardListSerializer(serializers.ModelSerializer):
+    # contains serializer method field
     ward = StudentListSerializer()
 
     class Meta:
         model = ParentWard
-        fields = ['id', 'ward']
-
+        fields = '__all__'

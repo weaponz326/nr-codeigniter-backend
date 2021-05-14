@@ -13,6 +13,7 @@ class Teacher(models.Model):
     last_name = models.CharField(max_length=100, blank=True)
     sex = models.CharField(max_length=20, choices=SEX_CHOICES, blank=True)
     date_of_birth = models.DateField(blank=True, null=True)
+    photo = models.FileField(null=True)
     nationality = models.CharField(max_length=50, blank=True)
     religion = models.CharField(max_length=50, blank=True)
     phone = models.CharField(max_length=20, blank=True)

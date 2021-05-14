@@ -2,169 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Bill, General
-from accounts.models import Profile
-from module_patients.models import Patient
-from module_admissions.models import Admission
-from .serializers import (
-    BillSerializer, 
-    BillSaveSerializer, 
-    GeneralSerializer, 
-    PatientSerializer, 
-    AdmissionSerializer
-)
+from .serializers import BillSerializer, BillListSerializer, GeneralSerializer
 
 
 # Create your views here.
 
-# create a new bill for the first time
-class NewBillView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = BillSaveSerializer(data=request.data)
-        if serializer.is_valid():
-            bill = Bill(
-                account=Profile.objects.get(id=request.data.get("hospital_id")),
-                patient=Patient.objects.get(id=request.data.get("patient_id")),
-                admission=Admission.objects.get(id=request.data.get("admission_id")),
-                bill_code=request.data.get("bill_code"),
-                bill_date=request.data.get("bill_date"),
-                total_amount=request.data.get("total_amount"),
-            )
-            bill.save()
-            latest_bill = Bill.objects.latest("id")
-
-            return Response({
-                'status': True,
-                'bill_id': latest_bill.id
-            })
-        else:
-            return Response({ 'status': False })
-
 class BillView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = BillSerializer
-        queryset = Bill.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        bill = Bill.objects.filter(account=account)
+        serializer = BillListSerializer(bill, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = BillSaveSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = BillSerializer(data=request.data)
         if serializer.is_valid():
-            bill = Bill(
-                account=Profile.objects.get(id=request.data.get("hospital_id")),
-                patient=Patient.objects.get(id=request.data.get("patient_id")),
-                admission=Admission.objects.get(id=request.data.get("admission_id")),
-                bill_code=request.data.get("bill_code"),
-                bill_date=request.data.get("bill_date"),
-                total_amount=request.data.get("total_amount"),
-            )
-            bill.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class BillDetailView(APIView):
+    def get(self, request, pk, format=None):
+        bill = Bill.objects.get(pk=pk)
+        serializer = BillListSerializer(bill)
+        return Response(serializer.data)
 
-class BillListView(generics.ListAPIView):
-    serializer_class = BillSerializer
+    def put(self, request, pk, format=None):
+        bill = Bill.objects.get(pk=pk)
+        serializer = BillSerializer(bill, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Bill.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
+    def delete(self, request, pk, format=None):
+        bill = Bill.objects.get(pk=pk)
+        bill.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class BillDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Bill.objects.all()
-    serializer_class = BillSaveSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# bill general items
-# ----------------------------------------------------------------------------------------------------------
+# general items
+# -------------------------------------------------------------------------------------------
 
 class GeneralView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = GeneralSerializer
-        queryset = General.objects.all()
+    def get(self, request, format=None):
+        bill = self.request.query_params.get('bill', None)
+        general = General.objects.filter(bill=bill)
+        serializer = GeneralSerializer(general, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = GeneralSerializer(data=request.data)
         if serializer.is_valid():
-            general = General(
-                bill=Bill.objects.get(id=request.data.get("bill_id")),
-                item=request.data.get("item"),
-                amount=request.data.get("amount"),
-            )
-            general.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class GeneralDetailView(APIView):
+    def get(self, request, pk, format=None):
+        general = General.objects.get(pk=pk)
+        serializer = GeneralSerializer(general)
+        return Response(serializer.data)
 
-class GeneralListView(generics.ListAPIView):
-    serializer_class = GeneralSerializer
+    def put(self, request, pk, format=None):
+        general = General.objects.get(pk=pk)
+        serializer = GeneralSerializer(general, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = General.objects.all()
-        bill = self.request.query_params.get('bill', None)
-        if bill is not None:
-            queryset = queryset.filter(bill=bill)
-        return queryset
-
-class GeneralDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = General.objects.all()
-    serializer_class = GeneralSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# patient and admission select grid list
-# --------------------------------------------------------------------------------------------------
-
-class PatientListView(generics.ListAPIView):
-    serializer_class = PatientSerializer
-
-    def get_queryset(self):
-        queryset = Patient.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
-
-class AdmissionListView(generics.ListAPIView):
-    serializer_class = AdmissionSerializer
-
-    def get_queryset(self):
-        queryset = Admission.objects.all()
-        hospital = self.request.query_params.get('user', None)
-        if hospital is not None:
-            queryset = queryset.filter(account=hospital)
-        return queryset
+    def delete(self, request, pk, format=None):
+        general = General.objects.get(pk=pk)
+        general.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

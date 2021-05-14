@@ -1,60 +1,38 @@
+from django.db.models import Sum
 from rest_framework import serializers
 
 from .models import Payment
-from module_patients.models import Patient
-from module_admissions.models import Admission
-from module_bills.models import Bill
+from module_bills.serializers import BillListSerializer
 
-
-# patient and admission to be merged into bill serializer
-
-class PatientSerializer(serializers.ModelSerializer):
-    patient_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Patient
-        fields = ['id', 'patient_name', 'clinical_number']
-
-    def get_patient_name(self, obj):
-        return '{} {}'.format(obj.first_name, obj.last_name) 
-
-class AdmissionSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Admission
-        fields = ['id', 'admission_code', 'admission_date']
-
-class BillSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Bill
-        fields = ['id', 'bill_code', 'bill_date', 'total_amount']
 
 class PaymentSerializer(serializers.ModelSerializer):
-    bill = BillSerializer()
+    class Meta:
+        model = Payment
+        fields = '__all__'  
+
+class PaymentListSerializer(serializers.ModelSerializer):
+    # contains serilaizer method field
+    bill = BillListSerializer()
 
     class Meta:
         model = Payment
-        fields = [
-            'id', 
-            'bill',
-            'payment_code', 
-            'payment_date', 
-            'amount_paid', 
-            'balance'
-        ]
+        fields = '__all__'  
+        depth = 2     
 
-# for saving payment patient, admission and bill with ids
-# to prevent saving with dictionary        
-class PaymentSaveSerializer(serializers.ModelSerializer):
+class PaymentSumSerializer(serializers.ModelSerializer):
+    # contains serilaizer method field
+    bill = BillListSerializer()
+    amount_paid = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
-        fields = [
-            'id', 
-            'bill', 
-            'payment_code', 
-            'payment_date', 
-            'amount_paid', 
-            'balance'
-        ]
+        fields = '__all__'  
+        depth = 2     
+
+    # TODO: not working
+    def get_amount_paid(self, obj):
+        pk = self.context.get('pk')
+        payment = Payment.objects.get(id=pk)
+        bill = payment.bill.id
+        return Payment.objects.filter(bill__id=bill).aggregate(Sum('payment')) 
+        # return Payment.objects.aggregate(Sum('payment'))         

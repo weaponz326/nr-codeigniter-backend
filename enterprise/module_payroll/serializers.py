@@ -5,4 +5,4 @@ from .models import Payroll
 class PayrollSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payroll
-        fields = ['id', 'payroll_name', 'payroll_status', 'date_generated', 'month', 'year']
+        fields = '__all__'

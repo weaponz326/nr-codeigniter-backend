@@ -2,131 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Order, OrderItem
-from accounts.models import Profile
-from module_menu.models import MenuItem
-from .serializers import OrderSerializer, OrderItemSerializer, MenuItemSerializer
+from .serializers import OrderSerializer, OrderItemSerializer
 
 
 # Create your views here.
 
 class OrderView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = OrderSerializer
-        queryset = Order.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        order = Order.objects.filter(account=account)
+        serializer = OrderSerializer(order, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            order = Order(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                order_code=request.data.get("order_code"),
-                order_date=request.data.get("order_date"),
-                customer_name=request.data.get("customer_name"),
-                order_type=request.data.get("order_type"),
-                order_status=request.data.get("order_status"),
-            )
-            order.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class OrderDetailView(APIView):
+    def get(self, request, pk, format=None):
+        order = Order.objects.get(pk=pk)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
 
-class OrderListView(generics.ListAPIView):
-    serializer_class = OrderSerializer
+    def put(self, request, pk, format=None):
+        order = Order.objects.get(pk=pk)
+        serializer = OrderSerializer(order, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Order.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
+    def delete(self, request, pk, format=None):
+        order = Order.objects.get(pk=pk)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class OrderDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# --------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------
 # order item
 
 class OrderItemView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = OrderItemSerializer
-        queryset = OrderItem.objects.all()
-
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = OrderSerializer(data=request.data)
-        if serializer.is_valid():
-            item = OrderItem(
-                order=Order.objects.get(id=request.data.get("order_id")),
-                menu_item=MenuItem.objects.get(id=request.data.get("menu_item_id")),
-                item_code=request.data.get("order_code"),
-                quantity=request.data.get("quantity"),
-            )
-            item.save()
-
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
-
-class OrderItemListView(generics.ListAPIView):
-    serializer_class = OrderItemSerializer
-
-    def get_queryset(self):
-        queryset = OrderItem.objects.all()
+    def get(self, request, format=None):
         order = self.request.query_params.get('order', None)
-        if order is not None:
-            queryset = queryset.filter(order=order)
-        return queryset
+        item = OrderItem.objects.filter(order=order)
+        serializer = OrderItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-class OrderItemDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+    def post(self, request, format=None):
+        serializer = OrderItemSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    queryset = Order.objects.all()
-    serializer_class = OrderItemSerializer
+class OrderItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = OrderItem.objects.get(pk=pk)
+        serializer = OrderItemSerializer(item)
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        item = OrderItem.objects.get(pk=pk)
+        serializer = OrderItemSerializer(item, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# -------------------------------------------------------------------------------------------------
-
-# get menu item list for dropdown select
-
-class MenuItemListView(generics.ListAPIView):
-    serializer_class = MenuItemSerializer
-
-    def get_queryset(self):
-        queryset = MenuItem.objects.all()
-        restaurant = self.request.query_params.get('restaurant', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
+    def delete(self, request, pk, format=None):
+        item = OrderItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

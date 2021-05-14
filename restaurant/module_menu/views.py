@@ -2,67 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import MenuItem
-from accounts.models import Profile
 from .serializers import MenuItemSerializer
 
 
 # Create your views here.
 
 class MenuItemView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = MenuItemSerializer
-        queryset = MenuItem.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        item = MenuItem.objects.filter(account=account)
+        serializer = MenuItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = MenuItemSerializer(data=request.data)
         if serializer.is_valid():
-            menu = MenuItem(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                item_code=request.data.get("item_code"),
-                item_name=request.data.get("item_name"),
-                category=request.data.get("category"),
-                price=request.data.get("price"),
-                description=request.data.get("description"),
-            )
-            menu.save()
-            latest_menu_item = MenuItem.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'menu_item_id': latest_menu_item.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class MenuItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = MenuItem.objects.get(pk=pk)
+        serializer = MenuItemSerializer(item)
+        return Response(serializer.data)
 
-class MenuItemListView(generics.ListAPIView):
-    serializer_class = MenuItemSerializer
+    def put(self, request, pk, format=None):
+        item = MenuItem.objects.get(pk=pk)
+        serializer = MenuItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = MenuItem.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
-class MenuItemDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = MenuItem.objects.all()
-    serializer_class = MenuItemSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        item = MenuItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

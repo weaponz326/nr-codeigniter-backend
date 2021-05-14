@@ -2,100 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Payment
-from accounts.models import Profile
-from module_bills.models import Bill
-from .serializers import PaymentSerializer, PaymentSaveSerializer, BillSerializer
+from .serializers import PaymentSerializer
 
 
 # Create your views here.
 
-# create a new payment for the first time
-class NewPaymentView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = PaymentSaveSerializer(data=request.data)
-        if serializer.is_valid():
-            payment = Payment(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                bill=Bill.objects.get(id=request.data.get("bill_id")),
-                payment_code=request.data.get("payment_code"),
-                payment_date=request.data.get("payment_date"),
-                amount_paid=request.data.get("amount_paid"),
-                balance=request.data.get("balance"),
-            )
-            payment.save()
-            latest_payment = Payment.objects.latest("id")
-
-            return Response({
-                'status': True,
-                'payment_id': latest_payment.id
-            })
-        else:
-            return Response({ 'status': False })
-
 class PaymentView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = PaymentSerializer
-        queryset = Payment.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        payment = Payment.objects.filter(account=account)
+        serializer = PaymentSerializer(payment, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = PaymentSaveSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = PaymentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            payment = Payment(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                bill=Bill.objects.get(id=request.data.get("bill_id")),
-                payment_code=request.data.get("payment_code"),
-                payment_date=request.data.get("payment_date"),
-                amount_paid=request.data.get("amount_paid"),
-                balance=request.data.get("balance"),
-            )
-            payment.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class PaymentDetailView(APIView):
+    def get(self, request, pk, format=None):
+        payment = Payment.objects.get(pk=pk)
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data)
 
-class PaymentListView(generics.ListAPIView):
-    serializer_class = PaymentSerializer
+    def put(self, request, pk, format=None):
+        payment = Payment.objects.get(pk=pk)
+        serializer = PaymentSerializer(payment, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Payment.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
-class PaymentDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSaveSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# bill select grid list
-# --------------------------------------------------------------------------------------------------
-
-class BillListView(generics.ListAPIView):
-    serializer_class = BillSerializer
-
-    def get_queryset(self):
-        queryset = Bill.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
+    def delete(self, request, pk, format=None):
+        payment = Payment.objects.get(pk=pk)
+        payment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

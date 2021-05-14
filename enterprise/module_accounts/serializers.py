@@ -5,23 +5,18 @@ from .models import Account, Transaction
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['id', 'account_name', 'account_number', 'bank_name']
+        fields = '__all__'
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['id', 'account', 'transaction_date', 'description', 'transaction_type', 'amount']
+        fields = '__all__'
 
-# to be merged with transactions
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-        fields = ['user']
-
-# merged with user serializer to get user
-class UserTransactionSerializer(serializers.ModelSerializer):
-    account = UserSerializer()
-
-    class Meta:
-        model = Transaction
-        fields = ['id', 'account', 'description', 'transaction_date', 'transaction_type', 'amount']
+    def __init__(self, *args, **kwargs):
+        super(TransactionSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and (request.method == 'POST' or request.method == 'PUT'):
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 1
+                

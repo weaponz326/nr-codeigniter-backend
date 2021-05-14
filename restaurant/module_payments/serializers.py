@@ -1,28 +1,18 @@
 from rest_framework import serializers
 
 from .models import Payment
-from module_bills.models import Bill
 
-
-# patient and admission to be merged into bill serializer
-
-class BillSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Bill
-        fields = ['id', 'bill_code', 'bill_date']
 
 class PaymentSerializer(serializers.ModelSerializer):
-    bill = BillSerializer()
 
     class Meta:
         model = Payment
-        fields = ['id', 'bill', 'payment_code', 'payment_date', 'amount_paid', 'balance']
+        fields = '__all__'
 
-# for saving payment bill with id
-# to prevent saving with dictionary        
-class PaymentSaveSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Payment
-        fields = ['id', 'bill', 'payment_code', 'payment_date', 'amount_paid', 'balance']
+    def __init__(self, *args, **kwargs):
+        super(PaymentSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and (request.method == 'POST' or request.method == 'PUT'):
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 1

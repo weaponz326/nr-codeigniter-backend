@@ -6,25 +6,7 @@ from .models import Patient
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = [
-            'id', 
-            'first_name',
-            'last_name',
-            'sex',
-            'date_of_birth',
-            'nationality',
-            'religion',
-            'occupation',
-            'phone',
-            'email',
-            'address',
-            'state',
-            'city',
-            'post_code',
-            'clinical_number',
-            'insurance_type',
-            'insurance_number'
-        ]
+        fields = '__all__'
 
 # merges first name and last name
 class PatientListSerializer(serializers.ModelSerializer):
@@ -32,13 +14,7 @@ class PatientListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = [
-            'id', 
-            'patient_name',
-            'sex',
-            'phone',
-            'clinical_number'
-        ]
+        fields = '__all__'
 
     def get_patient_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 

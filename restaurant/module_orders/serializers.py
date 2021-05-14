@@ -1,28 +1,25 @@
 from rest_framework import serializers
 
 from .models import Order, OrderItem
-from module_menu.models import MenuItem
-
 
 
 class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'order_code', 'order_date', 'customer_name', 'order_type', 'order_status']
-
-# menu item to merged into order item
-
-class MenuItemSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = MenuItem
-        fields = ['id', 'item_code', 'category', 'price']
+        fields = '__all__'
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    menu_item = MenuItemSerializer()
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'menu_item', 'item_code', 'quantity']
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(OrderItemSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and (request.method == 'POST' or request.method == 'PUT'):
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 1
 

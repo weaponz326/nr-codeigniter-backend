@@ -1,81 +1,32 @@
 from rest_framework import serializers
 
-from .models import Dispensary, Detail
-from module_prescriptions.models import Prescription
-from module_patients.models import Patient
-from module_doctors.models import Doctor
-from module_drugs.models import Drug
+from .models import Dispensary, DispensaryDrug
+from module_prescriptions.serializers import PrescriptionListSerializer
 
 
-# patient and doctor to be merged into prescription
-# then prescription will be merged with dispensary serializer
-
-class PatientSerializer(serializers.ModelSerializer):
-    patient_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Patient
-        fields = ['id', 'patient_name', 'clinical_number']
-
-    def get_patient_name(self, obj):
-        return '{} {}'.format(obj.first_name, obj.last_name) 
-
-class DoctorSerializer(serializers.ModelSerializer):
-    doctor_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Doctor
-        fields = ['id', 'doctor_name', 'doctor_code']
-
-    def get_doctor_name(self, obj):
-        return '{} {}'.format(obj.first_name, obj.last_name) 
-
-class PrescriptionSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer()
-    doctor = DoctorSerializer()
-
-    class Meta:
-        model = Prescription
-        fields = ['id', 'patient', 'doctor', 'prescription_code', 'prescription_date']
-
-# merge prescription containing patient and doctor to dispensary
 class DispensarySerializer(serializers.ModelSerializer):
-    prescription = PrescriptionSerializer()
+    class Meta:
+        model = Dispensary
+        fields = '__all__'
+
+class DispensaryListSerializer(serializers.ModelSerializer):
+    prescription = PrescriptionListSerializer()
 
     class Meta:
         model = Dispensary
-        fields = ['id', 'prescription', 'dispense_code', 'dispense_date']
+        fields = '__all__'
+        depth = 2
 
-# for saving dispensary's prescription with id
-# to prevent saving with dictionary        
-class DispensarySaveSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Prescription
-        fields = ['id', 'prescription', 'dispense_code', 'dispense_date']
-
-# -----------------------------------------------------------------------------------------------------------
-# dispensary details
-
-# merge drug into dispensary detail serializer
-
-class DrugSerializer(serializers.ModelSerializer):
+class DispensaryDrugSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Drug
-        fields = ['id', 'ndc_number', 'drug_name']
+        model = DispensaryDrug
+        fields = '__all__'
 
-class DetailSerializer(serializers.ModelSerializer):
-    drug = DrugSerializer()
-
-    class Meta:
-        model = Detail
-        fields = ['id', 'dispensary', 'drug', 'remarks']
-
-# for saving dispensary's detail drug with id
-# to prevent saving with dictionary        
-class DetailSaveSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Detail
-        fields = ['id', 'dispensary', 'drug', 'remarks']
+    def __init__(self, *args, **kwargs):
+        super(DispensaryDrugSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and (request.method == 'POST' or request.method == 'PUT'):
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 1

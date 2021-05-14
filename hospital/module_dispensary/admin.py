@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Dispensary, Detail
+from .models import Dispensary, DispensaryDrug
 
 
 # Register your models here.
@@ -7,8 +7,8 @@ from .models import Dispensary, Detail
 class DispensaryAdmin(admin.ModelAdmin):
     list_display = ('id', 'account', 'dispense_code', 'dispense_date', 'prescription')
 
-class DetailAdmin(admin.ModelAdmin):
+class DispensaryDrugAdmin(admin.ModelAdmin):
     list_display = ('id', 'dispensary', 'drug')
 
 admin.site.register(Dispensary, DispensaryAdmin)
-admin.site.register(Detail, DetailAdmin)
+admin.site.register(DispensaryDrug, DispensaryDrugAdmin)

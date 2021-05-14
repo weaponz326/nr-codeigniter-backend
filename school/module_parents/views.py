@@ -2,129 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Parent, ParentWard
-from accounts.models import Profile
-from module_students.models import Student
-from .serializers import (
-    ParentSerializer, 
-    ParentListSerializer, 
-    StudentListSerializer, 
-    ParentWardSerializer, 
-    ParentWardListSerializer
-)
+from .serializers import ParentSerializer, ParentListSerializer, ParentWardSerializer, ParentWardListSerializer
 
 
 # Create your views here.
 
 class ParentView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ParentSerializer
-        queryset = Parent.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        parent = Parent.objects.filter(account=account)
+        serializer = ParentListSerializer(parent, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ParentSerializer(data=request.data)
         if serializer.is_valid():
-            parent = Parent(
-                account=Profile.objects.get(id=request.data.get("school_id")),
-                parent_code=request.data.get("parent_code"),
-                first_name=request.data.get("first_name"),
-                last_name=request.data.get("last_name"),
-                sex=request.data.get("sex"),
-                nationality=request.data.get("nationality"),
-                religion=request.data.get("religion"),
-                occupation=request.data.get("occupation"),
-                phone=request.data.get("phone"),
-                email=request.data.get("email"),
-                address=request.data.get("address"),
-                state=request.data.get("state"),
-                city=request.data.get("city"),
-                post_code=request.data.get("post_code"),
-            )
-            parent.save()
-            latest_parent = Parent.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'parent_id': latest_parent.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ParentDetailView(APIView):
+    def get(self, request, pk, format=None):
+        parent = Parent.objects.get(pk=pk)
+        serializer = ParentSerializer(parent)
+        return Response(serializer.data)
 
-class ParentListView(generics.ListAPIView):
-    serializer_class = ParentListSerializer
+    def put(self, request, pk, format=None):
+        parent = Parent.objects.get(pk=pk)
+        serializer = ParentSerializer(parent, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Parent.objects.all()
-        school = self.request.query_params.get('user', None)
-        if school is not None:
-            queryset = queryset.filter(account=school)
-        return queryset
+    def delete(self, request, pk, format=None):
+        parent = Parent.objects.get(pk=pk)
+        parent.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class ParentDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Parent.objects.all()
-    serializer_class = ParentSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# ---------------------------------------------------------------------
-# parent's wards
-# all students
-
-class StudentListView(generics.ListAPIView):
-    serializer_class = StudentListSerializer
-
-    def get_queryset(self):
-        queryset = Student.objects.all()
-        school = self.request.query_params.get('user', None)
-        if school is not None:
-            queryset = queryset.filter(account=school)
-        return queryset
-
-# wards belonging to a parent
+# parent wards
+# -----------------------------------------------------------------------------------------------------------
 
 class ParentWardView(APIView):
-    def post(self, request, *args, **kwargs):
+    def get(self, request, format=None):
+        parent = self.request.query_params.get('parent', None)
+        ward = ParentWard.objects.filter(parent=parent)
+        serializer = ParentWardListSerializer(ward, many=True)        
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
         serializer = ParentWardSerializer(data=request.data)
         if serializer.is_valid():
-            ward = ParentWard(
-                parent=Parent.objects.get(id=request.data.get("parent")),
-                ward=Student.objects.get(id=request.data.get("ward")),
-            )
-            ward.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ParentWardDetailView(APIView):
+    def get(self, request, pk, format=None):
+        ward = ParentWard.objects.get(pk=pk)
+        serializer = ParentWardListSerializer(ward)
+        return Response(serializer.data)
 
-class ParentWardListView(generics.ListAPIView):
-    serializer_class = ParentWardListSerializer
+    def put(self, request, pk, format=None):
+        ward = ParentWard.objects.get(pk=pk)
+        serializer = ParentWardSerializer(ward, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = ParentWard.objects.all()
-        parent = self.request.query_params.get('parent', None)
-        if parent is not None:
-            queryset = queryset.filter(parent=parent)
-        return queryset
-
-class ParentWardDetailView(mixins.DestroyModelMixin, generics.GenericAPIView):
-    queryset = ParentWard.objects.all()
-    serializer_class = ParentWardSerializer
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        ward = ParentWard.objects.get(pk=pk)
+        ward.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

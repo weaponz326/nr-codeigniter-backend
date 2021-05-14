@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Prescription, Detail
+from .models import Prescription, PrescriptionDetail
 
 
 # Register your models here.
@@ -7,8 +7,8 @@ from .models import Prescription, Detail
 class PrescriptionAdmin(admin.ModelAdmin):
     list_display = ('id', 'account', 'prescription_code', 'prescription_date', 'patient')
 
-class DetailAdmin(admin.ModelAdmin):
+class PrescriptionDetailAdmin(admin.ModelAdmin):
     list_display = ('id', 'prescription', 'medicine')
 
 admin.site.register(Prescription, PrescriptionAdmin)
-admin.site.register(Detail, DetailAdmin)
+admin.site.register(PrescriptionDetail, PrescriptionDetailAdmin)

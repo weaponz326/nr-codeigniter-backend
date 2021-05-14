@@ -2,130 +2,82 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Received, Sent
-from accounts.models import Profile
 from .serializers import ReceivedSerializer, SentSerializer
 
 
 # Create your views here.
 
-
 # received letters
 # -------------------------------------------------------------------------------------------
 
 class ReceivedView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ReceivedSerializer
-        queryset = Received.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        received = Received.objects.filter(account=account)
+        serializer = ReceivedSerializer(received, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ReceivedSerializer(data=request.data)
         if serializer.is_valid():
-            received = Received(
-                account=Profile.objects.get(id=request.data.get("enteprise_id")),
-                reference_number=request.data.get("reference_number"),
-                letter_date=request.data.get("letter_date"),
-                sender=request.data.get("sender"),
-                subject=request.data.get("subject"),
-                date_received=request.data.get("date_received")
-            )
-            received.save()
-            latest_received = Received.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'received_id': latest_received.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ReceivedDetailView(APIView):
+    def get(self, request, pk, format=None):
+        received = Received.objects.get(pk=pk)
+        serializer = ReceivedSerializer(received)
+        return Response(serializer.data)
 
-class ReceivedListView(generics.ListAPIView):
-    serializer_class = ReceivedSerializer
+    def put(self, request, pk, format=None):
+        received = Received.objects.get(pk=pk)
+        serializer = ReceivedSerializer(received, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Received.objects.all()
-        enterprise = self.request.query_params.get('user', None)
-        if enterprise is not None:
-            queryset = queryset.filter(account=enterprise)
-        return queryset
-
-class ReceivedDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Received.objects.all()
-    serializer_class = ReceivedSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        received = Received.objects.get(pk=pk)
+        received.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # sent letters
 # -------------------------------------------------------------------------------------------
 
 class SentView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = SentSerializer
-        queryset = Sent.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        sent = Sent.objects.filter(account=account)
+        serializer = SentSerializer(sent, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = SentSerializer(data=request.data)
         if serializer.is_valid():
-            sent = Sent(
-                account=Profile.objects.get(id=request.data.get("enteprise_id")),
-                reference_number=request.data.get("reference_number"),
-                letter_date=request.data.get("letter_date"),
-                recipient=request.data.get("recipient"),
-                subject=request.data.get("subject"),
-                date_received=request.data.get("date_received")
-            )
-            sent.save()
-            latest_sent = Sent.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'sent_id': latest_sent.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class SentDetailView(APIView):
+    def get(self, request, pk, format=None):
+        sent = Sent.objects.get(pk=pk)
+        serializer = SentSerializer(sent)
+        return Response(serializer.data)
 
-class SentListView(generics.ListAPIView):
-    serializer_class = SentSerializer
+    def put(self, request, pk, format=None):
+        sent = Sent.objects.get(pk=pk)
+        serializer = SentSerializer(sent, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Sent.objects.all()
-        enterprise = self.request.query_params.get('user', None)
-        if enterprise is not None:
-            queryset = queryset.filter(account=enterprise)
-        return queryset
-
-class SentDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Sent.objects.all()
-    serializer_class = SentSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        sent = Sent.objects.get(pk=pk)
+        sent.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

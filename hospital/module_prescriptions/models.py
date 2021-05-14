@@ -17,7 +17,7 @@ class Prescription(models.Model):
     def __str__(self):
         return str(self.id)
 
-class Detail(models.Model):
+class PrescriptionDetail(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE)
     medicine = models.TextField(blank=True)
     dosage = models.TextField(blank=True)

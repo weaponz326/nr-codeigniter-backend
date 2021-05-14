@@ -17,3 +17,10 @@ class Laboratory(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+class Attachment(models.Model):
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE)
+    attachment = models.FileField(blank=True)
+
+    def __str__(self):
+        return str(self.id)

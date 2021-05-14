@@ -9,7 +9,7 @@ from module_terms.models import Term
 
 class Timetable(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    # term = models.ForeignKey(Term, on_delete=models.CASCADE)
+    term = models.ForeignKey(Term, null=True, on_delete=models.CASCADE)
     timetable_code = models.CharField(max_length=20, blank=True)
     timetable_name = models.CharField(max_length=100, blank=True)
     timetable_date = models.DateField(null=True, blank=True)

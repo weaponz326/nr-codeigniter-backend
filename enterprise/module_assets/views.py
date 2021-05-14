@@ -2,75 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Asset
-from accounts.models import Profile
 from .serializers import AssetSerializer
 
 
 # Create your views here.
 
 class AssetView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = AssetSerializer
-        queryset = Asset.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        asset = Asset.objects.filter(account=account)
+        serializer = AssetSerializer(asset, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = AssetSerializer(data=request.data)
         if serializer.is_valid():
-            asset = Asset(
-                account=Profile.objects.get(id=request.data.get("enteprise_id")),
-                asset_code=request.data.get("asset_code"),
-                asset_name=request.data.get("asset_name"),
-                asset_type=request.data.get("asset_type"),
-                category=request.data.get("category"),
-                date_purchased=request.data.get("date_purchased"),
-                purchased_value=request.data.get("purchased_value"),
-                supplier=request.data.get("supplier"),
-                brand=request.data.get("brand"),
-                model=request.data.get("model"),
-                serial_number=request.data.get("serial_number"),
-                description=request.data.get("description"),
-                location=request.data.get("location"),
-                condition=request.data.get("condition"),
-            )
-            asset.save()
-            latest_asset = Asset.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'asset_id': latest_asset.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class AssetDetailView(APIView):
+    def get(self, request, pk, format=None):
+        asset = Asset.objects.get(pk=pk)
+        serializer = AssetSerializer(asset)
+        return Response(serializer.data)
 
-class AssetListView(generics.ListAPIView):
-    serializer_class = AssetSerializer
+    def put(self, request, pk, format=None):
+        asset = Asset.objects.get(pk=pk)
+        serializer = AssetSerializer(asset, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Asset.objects.all()
-        enterprise = self.request.query_params.get('user', None)
-        if enterprise is not None:
-            queryset = queryset.filter(account=enterprise)
-        return queryset
-
-class AssetDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Asset.objects.all()
-    serializer_class = AssetSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        asset = Asset.objects.get(pk=pk)
+        asset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

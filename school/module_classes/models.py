@@ -2,6 +2,7 @@ from django.db import models
 
 from accounts.models import Profile
 from module_terms.models import Term
+from module_teachers.models import Teacher
 from module_subjects.models import Subject
 
 
@@ -9,8 +10,8 @@ from module_subjects.models import Subject
 
 class Class(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    # term = models.ForeignKey(Term, on_delete=models.CASCADE. null=True, blank=True)
-    # teacher = models.ForeignKey(TermTeacher, on_delete=models.CASCADE, null=True, blank=True)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE, null=True, blank=True)
+    class_teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=True, blank=True)
     class_name = models.CharField(max_length=100, blank=True)
     department = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=100, blank=True)

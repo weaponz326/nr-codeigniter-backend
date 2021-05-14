@@ -1,52 +1,30 @@
 from rest_framework import serializers
 
-from .models import Prescription, Detail
-from module_patients.models import Patient
-from module_doctors.models import Doctor
-
-
-# patient and doctor to be merged into prescription serializer
-
-class PatientSerializer(serializers.ModelSerializer):
-    patient_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Patient
-        fields = ['id', 'patient_name', 'clinical_number']
-
-    def get_patient_name(self, obj):
-        return '{} {}'.format(obj.first_name, obj.last_name) 
-
-class DoctorSerializer(serializers.ModelSerializer):
-    doctor_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Doctor
-        fields = ['id', 'doctor_name', 'doctor_code']
-
-    def get_doctor_name(self, obj):
-        return '{} {}'.format(obj.first_name, obj.last_name) 
+from .models import Prescription, PrescriptionDetail
+from module_patients.serializers import PatientListSerializer
+from module_doctors.serializers import DoctorListSerializer
 
 class PrescriptionSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer()
-    doctor = DoctorSerializer()
 
     class Meta:
         model = Prescription
-        fields = ['id', 'patient', 'doctor', 'prescription_code', 'prescription_date']
+        fields = '__all__'
 
-# for saving prescription patient and doctor with ids
-# to prevent saving with dictionary        
-class PrescriptionSaveSerializer(serializers.ModelSerializer):
+class PrescriptionListSerializer(serializers.ModelSerializer):
+    # contain serializer menthod fields
+    patient = PatientListSerializer()
+    doctor = DoctorListSerializer()
 
     class Meta:
         model = Prescription
-        fields = ['id', 'patient', 'doctor', 'prescription_code', 'prescription_date']
+        fields = '__all__'
+        depth = 1
+
 
 # prescription details
 
-class DetailSerializer(serializers.ModelSerializer):
+class PrescriptionDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Detail
-        fields = ['id', 'medicine', 'dosage', 'remarks']
+        model = PrescriptionDetail
+        fields = '__all__'

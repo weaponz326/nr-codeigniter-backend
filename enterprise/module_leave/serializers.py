@@ -1,20 +1,19 @@
 from rest_framework import serializers
 
 from .models import Leave
+from module_employees.serializers import EmployeeListSerializer
 
 
 class LeaveSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Leave
-        fields = [
-            'id', 
-            'leave_code',
-            'date_requested',
-            'leave_type',
-            'from_date',
-            'to_date',
-            'duration',
-            'reason',
-            'status',
-        ]
+        fields = '__all__'
 
+class LeaveListSerializer(serializers.ModelSerializer):
+    # contain serializer menthod fields
+    employee = EmployeeListSerializer()
+
+    class Meta:
+        model = Leave
+        fields = '__all__'

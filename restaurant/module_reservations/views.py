@@ -2,65 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Reservation
-from accounts.models import Profile
 from .serializers import ReservationSerializer
 
 
 # Create your views here.
 
 class ReservationView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ReservationSerializer
-        queryset = Reservation.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        reservation = Reservation.objects.filter(account=account)
+        serializer = ReservationSerializer(reservation, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ReservationSerializer(data=request.data)
         if serializer.is_valid():
-            reservation = Reservation(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                reservation_code=request.data.get("reservation_code"),
-                reservation_date=request.data.get("reservation_date"),
-                customer_name=request.data.get("customer_name"),
-                number_guests=request.data.get("number_guests"),
-                number_tables=request.data.get("number_tables"),
-                arrival_date=request.data.get("arrival_date"),
-                reservation_status=request.data.get("reservation_status"),
-            )
-            reservation.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ReservationDetailView(APIView):
+    def get(self, request, pk, format=None):
+        reservation = Reservation.objects.get(pk=pk)
+        serializer = ReservationSerializer(reservation)
+        return Response(serializer.data)
 
-class ReservationListView(generics.ListAPIView):
-    serializer_class = ReservationSerializer
+    def put(self, request, pk, format=None):
+        reservation = Reservation.objects.get(pk=pk)
+        serializer = ReservationSerializer(reservation, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Reservation.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
-class ReservationDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Reservation.objects.all()
-    serializer_class = ReservationSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        reservation = Reservation.objects.get(pk=pk)
+        reservation.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

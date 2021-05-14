@@ -16,7 +16,7 @@ class Dispensary(models.Model):
     def __str__(self):
         return str(self.id)
 
-class Detail(models.Model):
+class DispensaryDrug(models.Model):
     dispensary = models.ForeignKey(Dispensary, on_delete=models.CASCADE)
     drug = models.ForeignKey(Drug, on_delete=models.CASCADE)
     remarks = models.TextField(blank=True)

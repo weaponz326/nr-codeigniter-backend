@@ -13,8 +13,7 @@ class Payment(models.Model):
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE, null=True, blank=True)
     payment_code = models.CharField(max_length=50, blank=True)
     payment_date = models.DateField(null=True, blank=True)
-    amount_paid = models.DecimalField(max_digits=11, decimal_places=2, null=True)
-    balance = models.DecimalField(max_digits=11, decimal_places=2, null=True)
+    payment = models.DecimalField(max_digits=11, decimal_places=2, null=True)
 
     def __str__(self):
         return str(self.id)

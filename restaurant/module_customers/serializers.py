@@ -4,24 +4,10 @@ from .models import Customer
 
 
 class CustomerSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Customer
-        fields = [
-            'id', 
-            'first_name',
-            'last_name',
-            'sex',
-            'phone',
-            'email',
-            'address',
-            'state',
-            'city',
-            'post_code',
-            'customer_code',
-            'religion',
-            'allergies',
-            'preferences'
-        ]
+        fields = '__all__'
 
 # merges first name and last name
 class CustomerListSerializer(serializers.ModelSerializer):
@@ -29,13 +15,7 @@ class CustomerListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = [
-            'id', 
-            'customer_name',
-            'sex',
-            'phone',
-            'customer_code'
-        ]
+        fields = '__all__'
 
     def get_customer_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 
