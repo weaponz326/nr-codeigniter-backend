@@ -1,0 +1,1 @@
+default_app_config = 'module_action_plan.apps.ModuleActionPlanConfig'

@@ -45,6 +45,17 @@ INSTALLED_APPS = [
     'module_admin',
     'module_portal',
     'module_settings',
+    'module_accounts',
+    'module_members',
+    'module_committees',
+    'module_dues',
+    'module_executives',
+    'module_action_plan',
+    'module_budget',
+    'module_attendance',
+    'module_meetings',
+    'module_groups',
+    'module_year',
 ]
 
 MIDDLEWARE = [
