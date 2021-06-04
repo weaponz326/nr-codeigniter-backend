@@ -2,65 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Sheet
-from accounts.models import Profile
 from .serializers import SheetSerializer
 
 
 # Create your views here.
 
 class SheetView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = SheetSerializer
-        queryset = Sheet.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        sheet = Sheet.objects.filter(account=account)
+        serializer = SheetSerializer(sheet, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = SheetSerializer(data=request.data)
         if serializer.is_valid():
-            sheet = Sheet(
-                account=Profile.objects.get(id=request.data.get("shop_id")),
-                sheet_code=request.data.get("sheet_code"),
-                sheet_name=request.data.get("sheet_name"),
-                sheet_type=request.data.get("sheet_type"),
-            )
-            sheet.save()
-            latest_sheet = Sheet.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'sheet_id': latest_sheet.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class SheetDetailView(APIView):
+    def get(self, request, pk, format=None):
+        sheet = Sheet.objects.get(pk=pk)
+        serializer = SheetSerializer(sheet)
+        return Response(serializer.data)
 
-class SheetListView(generics.ListAPIView):
-    serializer_class = SheetSerializer
+    def put(self, request, pk, format=None):
+        sheet = Sheet.objects.get(pk=pk)
+        serializer = SheetSerializer(sheet, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Sheet.objects.all()
-        shop = self.request.query_params.get('user', None)
-        if shop is not None:
-            queryset = queryset.filter(account=shop)
-        return queryset
-
-class SheetDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Sheet.objects.all()
-    serializer_class = SheetSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        sheet = Sheet.objects.get(pk=pk)
+        sheet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

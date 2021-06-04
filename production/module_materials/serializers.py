@@ -6,12 +6,4 @@ from .models import Material
 class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
-        fields = [
-            'id', 
-            'material_code',
-            'material_name',
-            'description',
-            'category',
-            'unit_price',
-            'quantity',
-        ]
+        fields = '__all__'           

@@ -2,65 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Payable
-from accounts.models import Profile
 from .serializers import PayableSerializer
 
 
 # Create your views here.
 
 class PayableView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = PayableSerializer
-        queryset = Payable.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        payable = Payable.objects.filter(account=account)
+        serializer = PayableSerializer(payable, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = PayableSerializer(data=request.data)
         if serializer.is_valid():
-            payable = Payable(
-                account=Profile.objects.get(id=request.data.get("shop_id")),
-                payable_code=request.data.get("payable_code"),
-                payable_date=request.data.get("payable_date"),
-                due_date=request.data.get("due_date"),
-                invoice_number=request.data.get("invoice_number"),
-                customer_name=request.data.get("customer_name"),
-                amount=request.data.get("amount"),
-                date_paid=request.data.get("date_paid")
-            )
-            payable.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class PayableDetailView(APIView):
+    def get(self, request, pk, format=None):
+        payable = Payable.objects.get(pk=pk)
+        serializer = PayableSerializer(payable)
+        return Response(serializer.data)
 
-class PayableListView(generics.ListAPIView):
-    serializer_class = PayableSerializer
+    def put(self, request, pk, format=None):
+        payable = Payable.objects.get(pk=pk)
+        serializer = PayableSerializer(payable, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Payable.objects.all()
-        shop = self.request.query_params.get('user', None)
-        if shop is not None:
-            queryset = queryset.filter(account=shop)
-        return queryset
-
-class PayableDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Payable.objects.all()
-    serializer_class = PayableSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        payable = Payable.objects.get(pk=pk)
+        payable.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

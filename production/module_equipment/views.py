@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Equipment
 from accounts.models import Profile
@@ -12,63 +12,34 @@ from .serializers import EquipmentSerializer
 # Create your views here.
 
 class EquipmentView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = EquipmentSerializer
-        queryset = Equipment.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        equipment = Equipment.objects.filter(account=account)
+        serializer = EquipmentSerializer(equipment, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = EquipmentSerializer(data=request.data)
         if serializer.is_valid():
-            equipment = Equipment(
-                account=Profile.objects.get(id=request.data.get("production_id")),
-                equipment_code=request.data.get("equipment_code"),
-                equipment_name=request.data.get("equipment_name"),
-                equipment_type=request.data.get("equipment_type"),
-                category=request.data.get("category"),
-                brand=request.data.get("brand"),
-                model=request.data.get("model"),
-                serial_number=request.data.get("serial_number"),
-                description=request.data.get("description"),
-                location=request.data.get("location"),
-                condition=request.data.get("condition"),
-                equipment_status=request.data.get("equipment_status"),
-            )
-            equipment.save()
-            latest_equipment = Equipment.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'equipment_id': latest_equipment.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class EquipmentDetailView(APIView):
+    def get(self, request, pk, format=None):
+        equipment = Equipment.objects.get(pk=pk)
+        serializer = EquipmentSerializer(equipment)
+        return Response(serializer.data)
 
-class EquipmentListView(generics.ListAPIView):
-    serializer_class = EquipmentSerializer
+    def put(self, request, pk, format=None):
+        equipment = Equipment.objects.get(pk=pk)
+        serializer = EquipmentSerializer(equipment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Equipment.objects.all()
-        production = self.request.query_params.get('user', None)
-        if production is not None:
-            queryset = queryset.filter(account=production)
-        return queryset
-
-class EquipmentDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Equipment.objects.all()
-    serializer_class = EquipmentSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        equipment = Equipment.objects.get(pk=pk)
+        equipment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

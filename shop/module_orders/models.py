@@ -10,7 +10,6 @@ class Order(models.Model):
     order_code = models.CharField(max_length=20, blank=True)
     order_date = models.DateTimeField(null=True, blank=True)
     customer_name = models.CharField(max_length=100, blank=True)
-    order_type = models.CharField(max_length=50, blank=True)
     order_status = models.CharField(max_length=20, blank=True)
 
     def __str__(self):

@@ -11,8 +11,6 @@ class Material(models.Model):
     material_name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=50, blank=True)
-    unit_price = models.CharField(max_length=15, blank=True)
-    quantity = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
         return str(self.id)

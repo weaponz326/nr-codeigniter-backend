@@ -6,23 +6,7 @@ from .models import Staff
 class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
-        fields = [
-            'id', 
-            'first_name',
-            'last_name',
-            'sex',
-            'date_of_birth',
-            'nationality',
-            'religion',
-            'phone',
-            'email',
-            'address',
-            'state',
-            'city',
-            'post_code',
-            'staff_code',
-            'job',
-        ]
+        fields = '__all__'
 
 # merges first name and last name
 class StaffListSerializer(serializers.ModelSerializer):
@@ -30,12 +14,7 @@ class StaffListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Staff
-        fields = [
-            'id', 
-            'staff_code',
-            'staff_name',
-            'job',
-        ]
+        fields = '__all__'
 
     def get_staff_name(self, obj):
         return '{} {}'.format(obj.first_name, obj.last_name) 

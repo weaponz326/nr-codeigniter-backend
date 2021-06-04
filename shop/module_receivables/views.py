@@ -2,65 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Receivable
-from accounts.models import Profile
 from .serializers import ReceivableSerializer
 
 
 # Create your views here.
 
 class ReceivableView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ReceivableSerializer
-        queryset = Receivable.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        receivable = Receivable.objects.filter(account=account)
+        serializer = ReceivableSerializer(receivable, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ReceivableSerializer(data=request.data)
         if serializer.is_valid():
-            receivable = Receivable(
-                account=Profile.objects.get(id=request.data.get("shop_id")),
-                receivable_code=request.data.get("receivable_code"),
-                receivable_date=request.data.get("receivable_date"),
-                due_date=request.data.get("due_date"),
-                invoice_number=request.data.get("invoice_number"),
-                customer_name=request.data.get("customer_name"),
-                amount=request.data.get("amount"),
-                date_received=request.data.get("date_received")
-            )
-            receivable.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ReceivableDetailView(APIView):
+    def get(self, request, pk, format=None):
+        receivable = Receivable.objects.get(pk=pk)
+        serializer = ReceivableSerializer(receivable)
+        return Response(serializer.data)
 
-class ReceivableListView(generics.ListAPIView):
-    serializer_class = ReceivableSerializer
+    def put(self, request, pk, format=None):
+        receivable = Receivable.objects.get(pk=pk)
+        serializer = ReceivableSerializer(receivable, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Receivable.objects.all()
-        shop = self.request.query_params.get('user', None)
-        if shop is not None:
-            queryset = queryset.filter(account=shop)
-        return queryset
-
-class ReceivableDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Receivable.objects.all()
-    serializer_class = ReceivableSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        receivable = Receivable.objects.get(pk=pk)
+        receivable.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -8,7 +8,7 @@ from module_products.models import Product
 
 class Manufacturing(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, null=True, on_delete=models.CASCADE)
     manufacturing_code = models.CharField(max_length=20, blank=True)
     description = models.TextField(blank=True)
     start_date = models.DateField(null=True, blank=True)

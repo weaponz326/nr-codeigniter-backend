@@ -2,65 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
-from .models import Service
-from accounts.models import Profile
-from .serializers import ServiceSerializer
+from .models import Service, ServiceItem
+from .serializers import ServiceSerializer, ServiceItemSerializer
 
 
 # Create your views here.
 
 class ServiceView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ServiceSerializer
-        queryset = Service.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        service = Service.objects.filter(account=account)
+        serializer = ServiceSerializer(service, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid():
-            service = Service(
-                account=Profile.objects.get(id=request.data.get("hotel_id")),
-                service_code=request.data.get("service_code"),
-                service_type=request.data.get("service_type"),
-                service_date=request.data.get("service_date"),
-            )
-            service.save()
-            latest_service = Service.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'service_id': latest_service.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ServiceDetailView(APIView):
+    def get(self, request, pk, format=None):
+        service = Service.objects.get(pk=pk)
+        serializer = ServiceSerializer(service)
+        return Response(serializer.data)
 
-class ServiceListView(generics.ListAPIView):
-    serializer_class = ServiceSerializer
+    def put(self, request, pk, format=None):
+        service = Service.objects.get(pk=pk)
+        serializer = ServiceSerializer(service, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Service.objects.all()
-        hotel = self.request.query_params.get('user', None)
-        if hotel is not None:
-            queryset = queryset.filter(account=hotel)
-        return queryset
+    def delete(self, request, pk, format=None):
+        service = Service.objects.get(pk=pk)
+        service.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class ServiceDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+# ------------------------------------------------------------------------------------------------------------------------
+# service item
 
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
+class ServiceItemView(APIView):
+    def get(self, request, format=None):
+        service = self.request.query_params.get('service', None)
+        item = ServiceItem.objects.filter(service=service)
+        serializer = ServiceItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def post(self, request, format=None):
+        serializer = ServiceItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+class ServiceItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = ServiceItem.objects.get(pk=pk)
+        serializer = ServiceItemSerializer(item)
+        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        item = ServiceItem.objects.get(pk=pk)
+        serializer = ServiceItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        item = ServiceItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

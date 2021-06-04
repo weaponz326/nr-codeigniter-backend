@@ -12,58 +12,34 @@ from .serializers import ProductSerializer
 # Create your views here.
 
 class ProductView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ProductSerializer
-        queryset = Product.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        product = Product.objects.filter(account=account)
+        serializer = ProductSerializer(product, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
-            product = Product(
-                account=Profile.objects.get(id=request.data.get("production_id")),
-                product_code=request.data.get("product_code"),
-                product_name=request.data.get("product_name"),
-                product_type=request.data.get("product_type"),
-                description=request.data.get("description"),
-                version=request.data.get("version"),
-                model_number=request.data.get("model_number"),
-            )
-            product.save()
-            latest_product = Product.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'product_id': latest_product.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ProductDetailView(APIView):
+    def get(self, request, pk, format=None):
+        product = Product.objects.get(pk=pk)
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
 
-class ProductListView(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    def put(self, request, pk, format=None):
+        product = Product.objects.get(pk=pk)
+        serializer = ProductSerializer(product, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        production = self.request.query_params.get('user', None)
-        if production is not None:
-            queryset = queryset.filter(account=production)
-        return queryset
-
-class ProductDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        product = Product.objects.get(pk=pk)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -2,66 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
-from .models import Housekeeping
-from accounts.models import Profile
-from module_rooms.models import Room
-from .serializers import HousekeepingSerializer
+from .models import Housekeeping, Checklist
+from .serializers import HousekeepingSerializer, ChecklistSerializer
 
 
 # Create your views here.
 
 class HousekeepingView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = HousekeepingSerializer
-        queryset = Housekeeping.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        housekeeping = Housekeeping.objects.filter(account=account)
+        serializer = HousekeepingSerializer(housekeeping, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = HousekeepingSerializer(data=request.data)
         if serializer.is_valid():
-            housekeeping = Housekeeping(
-                account=Profile.objects.get(id=request.data.get("hotel_id")),
-                room=Room.objects.get(id=request.data.get("room_id")),
-                housekeeping_code=request.data.get("housekeeping_code"),
-                housekeeping_date=request.data.get("housekeeping_date"),
-            )
-            housekeeping.save()
-            latest_housekeeping = Housekeeping.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'housekeeping_id': latest_housekeeping.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class HousekeepingDetailView(APIView):
+    def get(self, request, pk, format=None):
+        housekeeping = Housekeeping.objects.get(pk=pk)
+        serializer = HousekeepingSerializer(housekeeping)
+        return Response(serializer.data)
 
-class HousekeepingListView(generics.ListAPIView):
-    serializer_class = HousekeepingSerializer
+    def put(self, request, pk, format=None):
+        housekeeping = Housekeeping.objects.get(pk=pk)
+        serializer = HousekeepingSerializer(housekeeping, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Housekeeping.objects.all()
-        hotel = self.request.query_params.get('user', None)
-        if hotel is not None:
-            queryset = queryset.filter(account=hotel)
-        return queryset
+    def delete(self, request, pk, format=None):
+        housekeeping = Housekeeping.objects.get(pk=pk)
+        housekeeping.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class HousekeepingDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+# ---------------------------------------------------------------------------------------------------
+# checklist
 
-    queryset = Housekeeping.objects.all()
-    serializer_class = HousekeepingSerializer
+class ChecklistView(APIView):
+    def get(self, request, format=None):
+        housekeeping = self.request.query_params.get('housekeeping', None)
+        checklist = Checklist.objects.filter(housekeeping=housekeeping)
+        serializer = ChecklistSerializer(checklist, many=True)        
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def post(self, request, format=None):
+        serializer = ChecklistSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+class ChecklistDetailView(APIView):
+    def get(self, request, pk, format=None):
+        checklist = Checklist.objects.get(pk=pk)
+        serializer = ChecklistSerializer(checklist)
+        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        checklist = Checklist.objects.get(pk=pk)
+        serializer = ChecklistSerializer(checklist, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serialzer.data })
+        return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        checklist = Checklist.objects.get(pk=pk)
+        checklist.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

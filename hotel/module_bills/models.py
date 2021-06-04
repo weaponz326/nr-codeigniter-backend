@@ -9,7 +9,7 @@ from module_services.models import Service
 
 class Bill(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
+    guest = models.ForeignKey(Guest, null=True, on_delete=models.CASCADE)
     bill_code = models.CharField(max_length=20, blank=True)
     bill_date = models.DateField(null=True, blank=True)
     

@@ -9,6 +9,6 @@ from .models import StockItem
 # Register your models here.
 
 class StockItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'account', 'material_name', 'quantity')
+    list_display = ('id', 'account', 'material', 'quantity')
 
 admin.site.register(StockItem, StockItemAdmin)

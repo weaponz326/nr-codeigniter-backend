@@ -1,6 +1,7 @@
 from django.db import models
 
 from accounts.models import Profile
+from module_products.models import Product
 
 
 # Create your models here.
@@ -15,3 +16,10 @@ class Supplier(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+class SupplierProduct(models.Model):
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id)        

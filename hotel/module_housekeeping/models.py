@@ -7,7 +7,7 @@ from module_rooms.models import Room
 
 class Housekeeping(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, null=True, on_delete=models.CASCADE)
     housekeeping_code = models.CharField(max_length=20, blank=True)
     housekeeping_date = models.DateField(null=True, blank=True)
     

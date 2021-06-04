@@ -6,6 +6,6 @@ from .models import Checkin
 # Register your models here.
 
 class CheckinAdmin(admin.ModelAdmin):
-    list_display = ('id', 'checkin_code', 'checkin_date', 'checkout_date', 'account')
+    list_display = ('id', 'checkin_code', 'booking', 'checkin_date', 'checkout_date', 'account')
 
 admin.site.register(Checkin, CheckinAdmin)

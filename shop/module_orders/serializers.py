@@ -6,4 +6,9 @@ from .models import Order, OrderItem
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['id', 'order_code', 'order_date', 'customer_name', 'order_type', 'order_status']
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = '__all__'

@@ -2,67 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Order, OrderItem
-from accounts.models import Profile
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer, OrderItemSerializer
 
 
 # Create your views here.
 
 class OrderView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = OrderSerializer
-        queryset = Order.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        order = Order.objects.filter(account=account)
+        serializer = OrderSerializer(order, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            order = Order(
-                account=Profile.objects.get(id=request.data.get("shop_id")),
-                order_code=request.data.get("order_code"),
-                order_date=request.data.get("order_date"),
-                customer_name=request.data.get("customer_name"),
-                order_type=request.data.get("order_type"),
-                order_status=request.data.get("order_status"),
-            )
-            order.save()
-            latest_order = Order.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'order_id': latest_order.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class OrderDetailView(APIView):
+    def get(self, request, pk, format=None):
+        order = Order.objects.get(pk=pk)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
 
-class OrderListView(generics.ListAPIView):
-    serializer_class = OrderSerializer
+    def put(self, request, pk, format=None):
+        order = Order.objects.get(pk=pk)
+        serializer = OrderSerializer(order, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Order.objects.all()
-        shop = self.request.query_params.get('user', None)
-        if shop is not None:
-            queryset = queryset.filter(account=shop)
-        return queryset
+    def delete(self, request, pk, format=None):
+        order = Order.objects.get(pk=pk)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class OrderDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+# ----------------------------------------------------------------------------------------------------------
+# order item
 
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+class OrderItemView(APIView):
+    def get(self, request, format=None):
+        order = self.request.query_params.get('order', None)
+        item = OrderItem.objects.filter(order=order)
+        serializer = OrderItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def post(self, request, format=None):
+        serializer = OrderItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+class OrderItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = OrderItem.objects.get(pk=pk)
+        serializer = OrderItemSerializer(item)
+        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        item = OrderItem.objects.get(pk=pk)
+        serializer = OrderItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        item = OrderItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

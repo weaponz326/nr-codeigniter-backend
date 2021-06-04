@@ -2,68 +2,43 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Room
-from accounts.models import Profile
 from .serializers import RoomSerializer
 
 
 # Create your views here.
 
 class RoomView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = RoomSerializer
-        queryset = Room.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        room = Room.objects.filter(account=account)
+        serializer = RoomSerializer(room, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = RoomSerializer(data=request.data)
         if serializer.is_valid():
-            room = Room(
-                account=Profile.objects.get(id=request.data.get("hotel_id")),
-                room_number=request.data.get("room_number"),
-                room_type=request.data.get("room_type"),
-                location=request.data.get("location"),
-                rate=request.data.get("rate"),
-                features=request.data.get("features"),
-                room_status=request.data.get("room_status"),
-            )
-            room.save()
-            latest_room = Room.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'room_id': latest_room.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class RoomDetailView(APIView):
+    def get(self, request, pk, format=None):
+        room = Room.objects.get(pk=pk)
+        serializer = RoomSerializer(room)
+        return Response(serializer.data)
 
-class RoomListView(generics.ListAPIView):
-    serializer_class = RoomSerializer
+    def put(self, request, pk, format=None):
+        room = Room.objects.get(pk=pk)
+        serializer = RoomSerializer(room, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Room.objects.all()
-        hotel = self.request.query_params.get('user', None)
-        if hotel is not None:
-            queryset = queryset.filter(account=hotel)
-        return queryset
-
-class RoomDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Room.objects.all()
-    serializer_class = RoomSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        room = Room.objects.get(pk=pk)
+        room.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -9,6 +9,7 @@ class Customer(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     customer_code = models.CharField(max_length=20, blank=True)
     customer_name = models.CharField(max_length=100, blank=True)
+    customer_type = models.CharField(max_length=30, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     email = models.CharField(max_length=50, blank=True)
     address = models.TextField(blank=True)

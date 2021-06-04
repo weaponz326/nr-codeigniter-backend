@@ -6,9 +6,9 @@ from .models import Service, ServiceItem
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = ['id', 'service_code', 'service_type', 'service_date']
+        fields = '__all__'
 
 class ServiceItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceItem
-        fields = ['id', 'item_date', 'amount']
+        fields = '__all__'

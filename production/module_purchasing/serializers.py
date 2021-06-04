@@ -6,4 +6,9 @@ from .models import Purchasing, PurchasingItem
 class PurchasingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchasing
-        fields = ['id', 'supplier_name', 'supplier_contact', 'purchasing_code', 'purchasing_date', 'supplier_invoice']
+        fields = '__all__'
+
+class PurchasingItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchasingItem
+        fields = '__all__'

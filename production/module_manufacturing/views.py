@@ -2,67 +2,44 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Manufacturing
 from accounts.models import Profile
-from module_products.models import Product
 from .serializers import ManufacturingSerializer
 
 
 # Create your views here.
 
 class ManufacturingView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ManufacturingSerializer
-        queryset = Manufacturing.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        manufacturing = Manufacturing.objects.filter(account=account)
+        serializer = ManufacturingSerializer(manufacturing, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ManufacturingSerializer(data=request.data)
         if serializer.is_valid():
-            manufacturing = Manufacturing(
-                account=Profile.objects.get(id=request.data.get("production_id")),
-                product=Product.objects.get(id=request.data.get("produc_id")),
-                manufacturing_code=request.data.get("manufacturing_code"),
-                description=request.data.get("description"),
-                start_date=request.data.get("start_date"),
-                end_date=request.data.get("end_date"),
-                quantity=request.data.get("quantity"),
-                manufacturing_status=request.data.get("manufacturing_status"),
-                remarks=request.data.get("remarks"),
-            )
-            manufacturing.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class ManufacturingDetailView(APIView):
+    def get(self, request, pk, format=None):
+        manufacturing = Manufacturing.objects.get(pk=pk)
+        serializer = ManufacturingSerializer(manufacturing)
+        return Response(serializer.data)
 
-class ManufacturingListView(generics.ListAPIView):
-    serializer_class = ManufacturingSerializer
+    def put(self, request, pk, format=None):
+        manufacturing = Manufacturing.objects.get(pk=pk)
+        serializer = ManufacturingSerializer(manufacturing, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Manufacturing.objects.all()
-        production = self.request.query_params.get('user', None)
-        if production is not None:
-            queryset = queryset.filter(account=production)
-        return queryset
-
-class ManufacturingDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Manufacturing.objects.all()
-    serializer_class = ManufacturingSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        manufacturing = Manufacturing.objects.get(pk=pk)
+        manufacturing.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

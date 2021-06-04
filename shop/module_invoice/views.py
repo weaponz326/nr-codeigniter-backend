@@ -2,67 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Invoice, InvoiceItem
-from accounts.models import Profile
-from .serializers import InvoiceSerializer
+from .serializers import InvoiceSerializer, InvoiceItemSerializer
 
 
 # Create your views here.
 
 class InvoiceView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = InvoiceSerializer
-        queryset = Invoice.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        invoice = Invoice.objects.filter(account=account)
+        serializer = InvoiceSerializer(invoice, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = InvoiceSerializer(data=request.data)
         if serializer.is_valid():
-            invoice = Invoice(
-                account=Profile.objects.get(id=request.data.get("shop_id")),
-                invoice_number=request.data.get("invoice_number"),
-                invoice_date=request.data.get("invoice_date"),
-                customer_name=request.data.get("customer_name"),
-                customer_contact=request.data.get("customer_contact"),
-                due_date=request.data.get("due_date"),
-            )
-            invoice.save()
-            latest_invoice = Invoice.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'invoice_id': latest_invoice.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class InvoiceDetailView(APIView):
+    def get(self, request, pk, format=None):
+        invoice = Invoice.objects.get(pk=pk)
+        serializer = InvoiceSerializer(invoice)
+        return Response(serializer.data)
 
-class InvoiceListView(generics.ListAPIView):
-    serializer_class = InvoiceSerializer
+    def put(self, request, pk, format=None):
+        invoice = Invoice.objects.get(pk=pk)
+        serializer = InvoiceSerializer(invoice, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Invoice.objects.all()
-        shop = self.request.query_params.get('user', None)
-        if shop is not None:
-            queryset = queryset.filter(account=shop)
-        return queryset
+    def delete(self, request, pk, format=None):
+        invoice = Invoice.objects.get(pk=pk)
+        invoice.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class InvoiceDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+# ----------------------------------------------------------------------------------------------------------
+# invoice item
 
-    queryset = Invoice.objects.all()
-    serializer_class = InvoiceSerializer
+class InvoiceItemView(APIView):
+    def get(self, request, format=None):
+        invoice = self.request.query_params.get('invoice', None)
+        item = InvoiceItem.objects.filter(invoice=invoice)
+        serializer = InvoiceItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def post(self, request, format=None):
+        serializer = InvoiceItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+class InvoiceItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = InvoiceItem.objects.get(pk=pk)
+        serializer = InvoiceItemSerializer(item)
+        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        item = InvoiceItem.objects.get(pk=pk)
+        serializer = InvoiceItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        item = InvoiceItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

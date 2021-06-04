@@ -2,67 +2,79 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Purchasing, PurchasingItem
-from accounts.models import Profile
-from .serializers import PurchasingSerializer
+from .serializers import PurchasingSerializer, PurchasingItemSerializer
 
 
 # Create your views here.
 
 class PurchasingView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = PurchasingSerializer
-        queryset = Purchasing.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        purchasing = Purchasing.objects.filter(account=account)
+        serializer = PurchasingSerializer(purchasing, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = PurchasingSerializer(data=request.data)
         if serializer.is_valid():
-            purchasing = Purchasing(
-                account=Profile.objects.get(id=request.data.get("production_id")),
-                purchasing_code=request.data.get("purchasing_code"),
-                purchasing_date=request.data.get("purchasing_date"),
-                supplier_name=request.data.get("supplier_name"),
-                supplier_contact=request.data.get("supplier_contact"),
-                supplier_invoice=request.data.get("supplier_invoice"),
-            )
-            purchasing.save()
-            latest_purchasing = Purchasing.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({
-                'status': True,
-                'purchasing_id': latest_purchasing.id
-            })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class PurchasingDetailView(APIView):
+    def get(self, request, pk, format=None):
+        purchasing = Purchasing.objects.get(pk=pk)
+        serializer = PurchasingSerializer(purchasing)
+        return Response(serializer.data)
 
-class PurchasingListView(generics.ListAPIView):
-    serializer_class = PurchasingSerializer
+    def put(self, request, pk, format=None):
+        purchasing = Purchasing.objects.get(pk=pk)
+        serializer = PurchasingSerializer(purchasing, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = Purchasing.objects.all()
-        production = self.request.query_params.get('user', None)
-        if production is not None:
-            queryset = queryset.filter(account=production)
-        return queryset
+    def delete(self, request, pk, format=None):
+        purchasing = Purchasing.objects.get(pk=pk)
+        purchasing.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class PurchasingDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
+# ----------------------------------------------------------------------------------------------------
+# purhasing items
 
-    queryset = Purchasing.objects.all()
-    serializer_class = PurchasingSerializer
+class PurchasingItemView(APIView):
+    def get(self, request, format=None):
+        purchasing = self.request.query_params.get('purchasing', None)
+        item = PurchasingItem.objects.filter(purchasing=purchasing)
+        serializer = PurchasingItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def post(self, request, format=None):
+        serializer = PurchasingItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+class PurchasingItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = PurchasingItem.objects.get(pk=pk)
+        serializer = PurchasingItemSerializer(item)
+        return Response(serializer.data)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def put(self, request, pk, format=None):
+        item = PurchasingItem.objects.get(pk=pk)
+        serializer = PurchasingItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        item = PurchasingItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

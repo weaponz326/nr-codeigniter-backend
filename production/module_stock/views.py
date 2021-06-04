@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import StockItem
 from accounts.models import Profile
@@ -12,53 +12,34 @@ from .serializers import StockItemSerializer
 # Create your views here.
 
 class StockItemView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = StockItemSerializer
-        queryset = StockItem.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        item = StockItem.objects.filter(account=account)
+        serializer = StockItemSerializer(item, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = StockItemSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = StockItemSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            item = StockItem(
-                account=Profile.objects.get(id=request.data.get("production_id")),
-                material_name=request.data.get("material_name"),
-                location=request.data.get("location"),
-                container=request.data.get("container"),
-                bin_number=request.data.get("bin_number"),
-                quantity=request.data.get("quantity"),
-            )
-            item.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class StockItemDetailView(APIView):
+    def get(self, request, pk, format=None):
+        item = StockItem.objects.get(pk=pk)
+        serializer = StockItemSerializer(item)
+        return Response(serializer.data)
 
-class StockItemListView(generics.ListAPIView):
-    serializer_class = StockItemSerializer
+    def put(self, request, pk, format=None):
+        item = StockItem.objects.get(pk=pk)
+        serializer = StockItemSerializer(item, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = StockItem.objects.all()
-        production = self.request.query_params.get('user', None)
-        if production is not None:
-            queryset = queryset.filter(account=production)
-        return queryset
-
-class StockItemDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = StockItem.objects.all()
-    serializer_class = StockItemSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        item = StockItem.objects.get(pk=pk)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

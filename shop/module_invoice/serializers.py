@@ -6,4 +6,9 @@ from .models import Invoice, InvoiceItem
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
-        fields = ['id', 'invoice_number', 'invoice_date', 'customer_name', 'customer_contact', 'due_date']
+        fields = '__all__'
+
+class InvoiceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceItem
+        fields = '__all__'

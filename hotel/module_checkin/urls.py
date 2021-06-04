@@ -4,6 +4,5 @@ from . import views
 
 urlpatterns = [
     path('checkin/', views.CheckinView.as_view()),
-    path('checkin-list/', views.CheckinListView.as_view()),
     path('checkin/<int:pk>', views.CheckinDetailView.as_view()),
 ]
