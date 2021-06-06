@@ -22,7 +22,7 @@ class AccountView(APIView):
         serializer = AccountSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
 class AccountDetailView(APIView):
@@ -36,7 +36,7 @@ class AccountDetailView(APIView):
         serializer = AccountSerializer(account, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
     def delete(self, request, pk, format=None):
@@ -58,7 +58,7 @@ class TransactionView(APIView):
         serializer = TransactionSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
 class TransactionDetailView(APIView):
@@ -72,7 +72,7 @@ class TransactionDetailView(APIView):
         serializer = TransactionSerializer(transaction, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
     def delete(self, request, pk, format=None):

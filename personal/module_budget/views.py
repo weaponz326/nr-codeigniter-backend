@@ -21,7 +21,7 @@ class BudgetView(APIView):
         serializer = BudgetSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
 class BudgetDetailView(APIView):
@@ -35,7 +35,7 @@ class BudgetDetailView(APIView):
         serializer = BudgetSerializer(budget, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
     def delete(self, request, pk, format=None):
@@ -57,7 +57,7 @@ class IncomeView(APIView):
         serializer = IncomeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
 class IncomeDetailView(APIView):
@@ -71,7 +71,7 @@ class IncomeDetailView(APIView):
         serializer = IncomeSerializer(income, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
     def delete(self, request, pk, format=None):
@@ -93,7 +93,7 @@ class ExpenditureView(APIView):
         serializer = ExpenditureSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
 class ExpenditureDetailView(APIView):
@@ -107,7 +107,7 @@ class ExpenditureDetailView(APIView):
         serializer = ExpenditureSerializer(expenditure, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
     def delete(self, request, pk, format=None):
