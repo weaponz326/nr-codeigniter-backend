@@ -33,7 +33,7 @@ urlpatterns = [
     path('module-workers/', include('module_workers.urls')),
     # path('module-tasks/', include('module_tasks.urls')),
     path('module-products/', include('module_products.urls')),
-    # path('module-schedules/', include('module_schedules.urls')),
+    # path('module-roster/', include('module_roster.urls')),
     path('module-materials/', include('module_materials.urls')),
     path('module-portal/', include('module_portal.urls')),
     path('module-settings/', include('module_settings.urls')),

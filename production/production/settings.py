@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'module_workers',
     'module_tasks',
     'module_products',
-    'module_schedules',
+    'module_roster',
     'module_materials',
     'module_portal',
     'module_settings',
