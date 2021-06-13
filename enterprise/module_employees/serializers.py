@@ -1,9 +1,12 @@
 from rest_framework import serializers
+from drf_base64.fields import Base64FileField
 
 from .models import Employee
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
+    photo = Base64FileField(required=False)
+
 
     class Meta:
         model = Employee
@@ -11,6 +14,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 # merges first name and last name
 class EmployeeListSerializer(serializers.ModelSerializer):
+    photo = Base64FileField(required=False)
     employee_name = serializers.SerializerMethodField()
 
     class Meta:

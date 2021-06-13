@@ -12,7 +12,7 @@ class Worker(models.Model):
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     sex = models.CharField(max_length=20, choices=SEX_CHOICES, blank=True)
-    photo = models.FileField(null=True)
+    photo = models.FileField(null=True, upload_to='workers')
     date_of_birth = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=50, blank=True)
     religion = models.CharField(max_length=50, blank=True)

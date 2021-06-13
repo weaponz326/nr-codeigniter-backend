@@ -1,16 +1,20 @@
 from rest_framework import serializers
+from drf_base64.fields import Base64FileField
 
 from .models import Parent, ParentWard
 from module_students.serializers import StudentListSerializer
 
 
 class ParentSerializer(serializers.ModelSerializer):
+    photo = Base64FileField(required=False)
+
     class Meta:
         model = Parent
         fields = '__all__'
 
 # merges first name and last name
 class ParentListSerializer(serializers.ModelSerializer):
+    photo = Base64FileField(required=False)
     parent_name = serializers.SerializerMethodField()
 
     class Meta:

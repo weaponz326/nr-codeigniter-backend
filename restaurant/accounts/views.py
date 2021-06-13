@@ -31,7 +31,7 @@ class NewProfileView(APIView):
 
             # personal users in admin module
             user = User(
-                personal_id=request.user.id,
+                personal_id=request.data.get("personal_id"),
                 account=Profile.objects.latest("id"),
                 is_creator=True,
                 is_admin=True
@@ -50,7 +50,7 @@ class NewProfileView(APIView):
 # checks if user has a restaurant acount
 class HasAccountView(APIView):
     def post(self, request, *args, **kwargs):
-        user = User.objects.filter(personal_id=request.user.id)
+        user = User.objects.filter(personal_id=request.data.get('personal_id'))
         if user.exists():
             return Response({'has_account': True})
         else:

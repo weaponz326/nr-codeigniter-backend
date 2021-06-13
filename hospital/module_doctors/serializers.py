@@ -1,15 +1,18 @@
 from rest_framework import serializers
+from drf_base64.fields import Base64FileField
 
 from .models import Doctor
 
 
 class DoctorSerializer(serializers.ModelSerializer):
+    photo = Base64FileField(required=False)
     class Meta:
         model = Doctor
         fields = '__all__'
 
 # merges first name and last name
 class DoctorListSerializer(serializers.ModelSerializer):
+    photo = Base64FileField(required=False)
     doctor_name = serializers.SerializerMethodField()
 
     class Meta:

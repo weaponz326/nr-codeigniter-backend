@@ -1,11 +1,11 @@
 from rest_framework import serializers
-# from base64.fields import Base64FileField
+from drf_base64.fields import Base64FileField
 
 from .models import Patient
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    # photo = Base64FileField(required=False)
+    photo = Base64FileField(required=False)
 
     class Meta:
         model = Patient
@@ -13,7 +13,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
 # merges first name and last name
 class PatientListSerializer(serializers.ModelSerializer):
-    # photo = Base64FileField(required=False)
+    photo = Base64FileField(required=False)
     patient_name = serializers.SerializerMethodField()
 
     class Meta:
