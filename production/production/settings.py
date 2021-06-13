@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'module_products',
     'module_roster',
     'module_materials',
+    'module_staff',
     'module_portal',
     'module_settings',
 ]
