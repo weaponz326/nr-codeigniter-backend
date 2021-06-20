@@ -40,6 +40,7 @@ urlpatterns = [
     path('module-staff/', include('module_staff.urls')),
     path('module-cashflow/', include('module_cashflow.urls')),
     path('module-purchasing/', include('module_purchasing.urls')),
+    path('module-roster/', include('module_roster.urls')),
     path('module-portal/', include('module_portal.urls')),
     path('module-settings/', include('module_settings.urls')),
 ]

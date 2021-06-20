@@ -1,7 +1,7 @@
 from django.db import models
 
 from accounts.models import Profile
-
+from module_members.models import Member
 
 # Create your models here.
 
@@ -13,3 +13,12 @@ class Attendance(models.Model):
     
     def __str__(self):
         return str(self.id)
+
+class AttendanceSheet(models.Model):
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
+    member = models.ForeignKey(Member, on_delete=models.CASCADE)
+    checks = models.JSONField();
+
+class AttendanceDay(models.Model):
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
+    day = models.DateField(null=True, blank=True)

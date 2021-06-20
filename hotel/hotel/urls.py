@@ -36,6 +36,7 @@ urlpatterns = [
     path('module-rooms/', include('module_rooms.urls')),
     path('module-assets/', include('module_assets.urls')),
     path('module-housekeeping/', include('module_housekeeping.urls')),
+    path('module-roster/', include('module_roster.urls')),
     path('module-portal/', include('module_portal.urls')),
     path('module-settings/', include('module_settings.urls')),
 ]

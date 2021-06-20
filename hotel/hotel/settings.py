@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'module_rooms',
     'module_assets',
     'module_housekeeping',
+    'module_roster',
     'module_portal',
     'module_settings',
 ]
@@ -98,6 +99,10 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+
+# auto id field after upgrading django to to 3.2
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Password validation

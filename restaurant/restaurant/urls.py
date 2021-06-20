@@ -39,6 +39,7 @@ urlpatterns = [
     path('module-reservations/', include('module_reservations.urls')),
     path('module-customers/', include('module_customers.urls')),
     path('module-bills/', include('module_bills.urls')),
+    path('module-roster/', include('module_roster.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
