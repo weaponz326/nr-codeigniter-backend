@@ -42,3 +42,11 @@ class PaymentDetailView(APIView):
         payment = Payment.objects.get(pk=pk)
         payment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class PaymentsHistoryView(APIView):
+    def get(self, request, format=None):
+        bill = self.request.query_params.get('bill', None)
+        payment = Payment.objects.filter(bill=bill)
+        serializer = PaymentSerializer(payment, many=True)        
+        return Response(serializer.data)
+

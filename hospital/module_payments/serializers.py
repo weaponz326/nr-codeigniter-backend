@@ -29,10 +29,8 @@ class PaymentSumSerializer(serializers.ModelSerializer):
         fields = '__all__'  
         depth = 2     
 
-    # TODO: not working
     def get_amount_paid(self, obj):
         pk = self.context.get('pk')
-        payment = Payment.objects.get(id=pk)
-        bill = payment.bill.id
-        return Payment.objects.filter(bill__id=bill).aggregate(Sum('payment')) 
-        # return Payment.objects.aggregate(Sum('payment'))         
+        payment = Payment.objects.get(pk=pk)
+        bill = payment.bill
+        return Payment.objects.filter(bill=bill.id).aggregate(Sum('payment')) 

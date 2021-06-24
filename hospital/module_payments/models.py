@@ -1,7 +1,6 @@
 from django.db import models
 
 from accounts.models import Profile
-from module_patients.models import Patient
 from module_admissions.models import Admission
 from module_bills.models import Bill
 

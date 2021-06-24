@@ -36,7 +36,7 @@ class PlanDetailView(APIView):
         serializer = PlanSerializer(plan, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({ 'message': 'OK', 'data': serialzer.data })
+            return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
     def delete(self, request, pk, format=None):
