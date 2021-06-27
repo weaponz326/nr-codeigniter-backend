@@ -52,13 +52,16 @@ class RefreshSheetView(APIView):
         assessment_id = self.request.query_params.get('assessment', None)
         assessment = Assessment.objects.get(id=assessment_id)
         class_id = assessment.clas.id
-        students = Student.objects.filter(clas=class_id)
+        student_set = Student.objects.filter(clas=class_id)
 
-        for student in students:
-            # TODO: cannot add student to filter
-            if not AssessmentSheet.objects.get(assessment=assessment_id):
-                sheet_item = AssessmentSheet(student=student.id)
-                sheet_item.save()
+        student_list = []
+
+        if student_set.exists():
+            for student in student_set.iterator():
+                this_student = AssessmentSheet.objects.filter(student=student.id)
+                if not this_student.exists():
+                    student_list.append(AssessmentSheet(student=student.id))
+            if not student_list == []: AssessmentSheet.objects.bulk_create(student_list)
 
         return Response({ 'message' : 'OK' })
 
