@@ -33,4 +33,4 @@ class AssessmentSheetListSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssessmentSheet
         fields = '__all__'
-        depth = 1
+        depth = 2

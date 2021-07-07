@@ -2,8 +2,8 @@ from django.db import models
 
 from accounts.models import Profile
 from module_terms.models import Term
-from module_teachers.models import Teacher
 from module_subjects.models import Subject
+from module_teachers.models import Teacher
 
 
 # Create your models here.

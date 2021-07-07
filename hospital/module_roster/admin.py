@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import Roster, Shift, Batch, DoctorsPersonnel, RosterDays, RosterSheet
+from .models import (
+    Roster, 
+    Shift, 
+    Batch, 
+    RosterDay, 
+    RosterSheet,
+    DoctorsPersonnel, 
+    NursesPersonnel, 
+    StaffPersonnel 
+)
 
 
 # Register your models here.
@@ -16,7 +25,7 @@ class BatchAdmin(admin.ModelAdmin):
 class DoctorsPersonnelAdmin(admin.ModelAdmin):
     list_display = ('id', 'roster', 'doctor', 'batch')
 
-class RosterDaysAdmin(admin.ModelAdmin):
+class RosterDayAdmin(admin.ModelAdmin):
     list_display = ('id', 'roster')
 
 class RosterSheetAdmin(admin.ModelAdmin):
@@ -26,5 +35,5 @@ admin.site.register(Roster, RosterAdmin)
 admin.site.register(Shift, ShiftAdmin)
 admin.site.register(Batch, BatchAdmin)
 admin.site.register(DoctorsPersonnel, DoctorsPersonnelAdmin)
-admin.site.register(RosterDays, RosterDaysAdmin)
+admin.site.register(RosterDay, RosterDayAdmin)
 admin.site.register(RosterSheet, RosterSheetAdmin)

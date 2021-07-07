@@ -2,10 +2,12 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import Class, ClassSubject
+from module_students.models import Student
 from .serializers import ClassSerializer, ClassListSerializer, ClassSubjectSerializer
+from module_students.serializers import StudentListSerializer
 
 
 # Create your views here.
@@ -78,3 +80,13 @@ class ClassSubjectDetailView(APIView):
         subject = ClassSubject.objects.get(pk=pk)
         subject.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# class students
+# -------------------------------------------------------------------------------------------------------------------
+
+class ClassStudentView(APIView):
+    def get(self, request, format=None):
+        clas = self.request.query_params.get('clas', None)
+        student = Student.objects.filter(clas=clas)
+        serializer = StudentListSerializer(student, many=True)        
+        return Response(serializer.data)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Timetable, TimetablePeriod, TimetableClass
+from .models import Timetable, TimetablePeriod, TimetableClass, TimetableSheet
 
 
 class TimetableSerializer(serializers.ModelSerializer):
@@ -36,3 +36,10 @@ class TimetableClassSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 1
+
+class TimetableSheetSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TimetableSheet
+        fields = '__all__'
+        depth = 2

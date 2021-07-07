@@ -195,7 +195,7 @@ class RefreshSheetView(APIView):
             for new_day in daterange(from_date, to_date):
                 for day in day_set.iterator():
                     if (new_day != day) and (new_day > to_date):
-                        add_list.append(RosterDay(roster=roster_instance, day=new_day))
+                        add_list.append(RosterDay(roster=roster_instance, day=str(new_day)))
                     if (new_day != day) and (new_day < from_date):
                         delete_list.append({roster:roster_instance, day:day})
 
@@ -203,7 +203,7 @@ class RefreshSheetView(APIView):
             if not delete_list == []: RosterDay.objects.filter(roster__in=delete_list[roster], day__in=delete_list[day])
         else:
             for new_day in daterange(from_date, to_date):
-                add_list.append(RosterDay(roster=roster_instance, day=new_day))
+                add_list.append(RosterDay(roster=roster_instance, day=str(new_day)))
             if not add_list == []: RosterDay.objects.bulk_create(add_list)
 
         # innitiate sheet fields
@@ -228,8 +228,8 @@ class RosterDayView(APIView):
 class RosterSheetView(APIView):
     def get(self, request, format=None):
         roster = self.request.query_params.get('roster', None)
-        roster = RosterSheet.objects.filter(roster=roster)
-        serializer = RosterSheetSerializer(roster, many=True)        
+        roster_instance = RosterSheet.objects.filter(roster=roster)
+        serializer = RosterSheetSerializer(roster_instance, many=True)        
         return Response(serializer.data)
 
     def post(self, request, format=None):

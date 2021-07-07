@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'module_menu',
     'module_staff',
     'module_tables',
-    'module_bills',
     'module_sittings',
     'module_orders',
     'module_deliveries',

@@ -17,7 +17,7 @@ class Section(models.Model):
     def __str__(self):
         return str(self.id)
 
-class SectionStudents(models.Model):
+class SectionStudent(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 

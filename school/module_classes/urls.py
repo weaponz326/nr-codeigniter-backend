@@ -7,4 +7,5 @@ urlpatterns = [
     path('class/<int:pk>', views.ClassDetailView.as_view()),
     path('class-subject/', views.ClassSubjectView.as_view()),
     path('class-subject/<int:pk>/', views.ClassSubjectDetailView.as_view()),
+    path('class-student/', views.ClassStudentView.as_view()),
 ]

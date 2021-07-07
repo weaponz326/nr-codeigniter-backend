@@ -2,6 +2,8 @@ from django.db import models
 
 from accounts.models import Profile
 from module_doctors.models import Doctor
+from module_nurses.models import Nurse
+from module_staff.models import Staff
 
 
 # Create your models here.
@@ -34,6 +36,15 @@ class Batch(models.Model):
     def __str__(self):
         return str(self.id)
 
+class RosterDay(models.Model):
+    roster = models.ForeignKey(Roster, on_delete=models.CASCADE)
+    day = models.JSONField()
+
+class RosterSheet(models.Model):
+    roster = models.ForeignKey(Roster, on_delete=models.CASCADE)
+    shift = models.ForeignKey(Shift, on_delete=models.CASCADE)
+    batches = models.JSONField();
+
 class DoctorsPersonnel(models.Model):
     roster = models.ForeignKey(Roster, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, null=True, on_delete=models.CASCADE)
@@ -42,11 +53,18 @@ class DoctorsPersonnel(models.Model):
     def __str__(self):
         return str(self.id)
 
-class RosterDays(models.Model):
+class NursesPersonnel(models.Model):
     roster = models.ForeignKey(Roster, on_delete=models.CASCADE)
-    days = models.JSONField()
+    nurse = models.ForeignKey(Nurse, null=True, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, null=True, on_delete=models.CASCADE)
 
-class RosterSheet(models.Model):
+    def __str__(self):
+        return str(self.id)
+
+class StaffPersonnel(models.Model):
     roster = models.ForeignKey(Roster, on_delete=models.CASCADE)
-    shift = models.ForeignKey(Shift, on_delete=models.CASCADE)
-    batch = models.JSONField();
+    staff = models.ForeignKey(Staff, null=True, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id)

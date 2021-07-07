@@ -43,6 +43,15 @@ class OrderDetailView(APIView):
         order.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class OrderTotalView(APIView):
+    def patch(self, request, pk, format=None):
+        total = Order.objects.get(pk=pk)
+        serializer = OrderSerializer(total, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
 # ----------------------------------------------------------------------------------------------------------
 # order item
 

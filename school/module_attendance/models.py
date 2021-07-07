@@ -25,6 +25,6 @@ class AttendanceSheet(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     checks = models.JSONField();
 
-class AttendanceDays(models.Model):
+class AttendanceDay(models.Model):
     attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
-    days = models.JSONField()
+    day = models.DateField(null=True, blank=True)

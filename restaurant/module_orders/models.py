@@ -13,6 +13,7 @@ class Order(models.Model):
     customer_name = models.CharField(max_length=100, blank=True)
     order_type = models.CharField(max_length=50, blank=True)
     order_status = models.CharField(max_length=50, blank=True)
+    order_total = models.CharField(max_length=15, blank=True)
 
     def __str__(self):
         return str(self.id)

@@ -6,5 +6,6 @@ urlpatterns = [
     path('attendance/', views.AttendanceView.as_view()),
     path('attendance/<int:pk>', views.AttendanceDetailView.as_view()),
     path('refresh-sheet/', views.RefreshSheetView.as_view()),
-    # path('attendance-sheet/', views.AttendanceSheetView.as_view())
+    path('attendance-day/', views.AttendanceDayView.as_view()),
+    path('attendance-sheet/', views.AttendanceSheetView.as_view()),
 ]

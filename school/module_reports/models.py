@@ -3,6 +3,8 @@ from django.db import models
 from accounts.models import Profile
 from module_terms.models import Term
 from module_classes.models import Class
+from module_assessment.models import Assessment
+from module_students.models import Student
 
 
 # Create your models here.
@@ -17,3 +19,18 @@ class Report(models.Model):
     
     def __str__(self):
         return str(self.id)
+
+class ReportAssessment(models.Model):
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, null=True, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.id)
+
+class ReportStudent(models.Model):
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, null=True, on_delete=models.SET_NULL)
+    
+    def __str__(self):
+        return str(self.id)
+

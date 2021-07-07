@@ -60,7 +60,7 @@ class RefreshSheetView(APIView):
             for student in student_set.iterator():
                 this_student = AssessmentSheet.objects.filter(student=student.id)
                 if not this_student.exists():
-                    student_list.append(AssessmentSheet(student=student.id))
+                    student_list.append(AssessmentSheet(assessment=assessment, student=student))
             if not student_list == []: AssessmentSheet.objects.bulk_create(student_list)
 
         return Response({ 'message' : 'OK' })
@@ -68,19 +68,20 @@ class RefreshSheetView(APIView):
 class ClassSheetView(APIView):
     def get(self, request, format=None):
         assessment = self.request.query_params.get('assessment', None)
-        sheet = AssessmentSheet.objects.filter(id=assessment)
+        sheet = AssessmentSheet.objects.filter(assessment=assessment)
         serializer = AssessmentSheetListSerializer(sheet, many=True)        
         return Response(serializer.data)
 
-    # def post(self, request, format=None):
-    #     serializer = AssessmentSerializer(data=request.data, context={'request': request})
-    #     if serializer.is_valid():
-    #         instance = serializer.save()
+    def post(self, request, format=None):
+        assessment_sheet=request.data
+        assessment_list = []
 
-    #         # create assessment sheet after cr.eating assessment
-    #         sheet = AssessmentSheet(sheet={})
-    #         sheet.id = instance.id
-    #         sheet.save()
+        for x in assessment_sheet:
+            sheet = AssessmentSheet.objects.get(id=x['id'])
+            sheet.score=x['score']
+            sheet.grade=x['grade']
+            sheet.remarks=x['remarks']
+            assessment_list.append(sheet)
 
-    #         return Response({ 'message': 'OK', 'data': serializer.data })
-    #     return Response(serializer.errors)
+        AssessmentSheet.objects.bulk_update(assessment_list, ['score', 'grade', 'remarks'])
+        return Response({ 'message': 'OK' })

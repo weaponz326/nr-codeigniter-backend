@@ -38,7 +38,6 @@ urlpatterns = [
     path('module-payments/', include('module_payments.urls')),
     path('module-reservations/', include('module_reservations.urls')),
     path('module-customers/', include('module_customers.urls')),
-    path('module-bills/', include('module_bills.urls')),
     path('module-roster/', include('module_roster.urls')),
 ]
 

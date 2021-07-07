@@ -5,9 +5,32 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from .models import Roster, Shift, Batch, DoctorsPersonnel, RosterDays, RosterSheet
-from .serializers import RosterSerializer, ShiftSerializer, BatchSerializer
+from .models import (
+    Roster, 
+    Shift, 
+    Batch, 
+    DoctorsPersonnel, 
+    NursesPersonnel, 
+    StaffPersonnel, 
+    RosterDay, 
+    RosterSheet
+)
+from .serializers import (
+    RosterSerializer, 
+    ShiftSerializer, 
+    BatchSerializer,    
+    RosterDaySerializer,
+    RosterSheetSerializer,
+    DoctorsPersonnelSerializer,
+    DoctorsPersonnelListSerializer,
+    NursesPersonnelSerializer,
+    NursesPersonnelListSerializer,
+    StaffPersonnelSerializer,
+    StaffPersonnelListSerializer,
+)
 from module_doctors.models import Doctor
+from module_nurses.models import Nurse
+from module_staff.models import Staff
 
 
 # Create your views here.
@@ -69,7 +92,7 @@ class ShiftDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        shift = Batch.objects.get(pk=pk)
+        shift = Shift.objects.get(pk=pk)
         serializer = ShiftSerializer(shift, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -120,19 +143,79 @@ class BatchDetailView(APIView):
 # --------------------------------------------------------------------------------
 # personnel
 
-# TODO: have to do it for all possible sources
 class RefreshPersonnelView(APIView):
     def get(self, request, format=None):        
         roster = self.request.query_params.get('roster', None)
-        account = roster.account
-        doctor_set = Doctor.objects.filter(account=account)
-
-        for doctor in doctor_set:
-            if not DoctorsPersonnel.objects.get(roster=roster):
-                personnel = DoctorsPersonnel(roster=roster.id, doctor=doctor.id)
-                personnel.save()
+        roster_instance = Roster.objects.get(id=roster)
+        account = roster_instance.account
+        
+        if roster_instance.source == "Doctors":
+            doctor_set = Doctor.objects.filter(account=account)
+            for doctor in doctor_set:
+                if not DoctorsPersonnel.objects.filter(roster=roster):
+                    personnel = DoctorsPersonnel(roster=roster_instance, doctor=doctor)
+                    personnel.save()
+        elif roster_instance.source == "Nurses":
+            nurse_set = Nurse.objects.filter(account=account)
+            for nurse in nurse_set:
+                if not NursesPersonnel.objects.filter(roster=roster):
+                    personnel = NursesPersonnel(roster=roster_instance, nurse=nurse)
+                    personnel.save()
+        elif roster_instance.source == "Staff":
+            staff_set = Staff.objects.filter(account=account)
+            for staff in staff_set:
+                if not StaffPersonnel.objects.filter(roster=roster):
+                    personnel = StaffPersonnel(roster=roster_instance, staff=staff)
+                    personnel.save()
 
         return Response({ 'message' : 'OK' })
+
+class PersonnelView(APIView):
+    def get(self, request, format=None):
+        roster = self.request.query_params.get('roster', None)
+        roster_instance = Roster.objects.get(id=roster)
+
+        if roster_instance.source == "Doctors":
+            personnel = DoctorsPersonnel.objects.filter(roster=roster)
+            serializer = DoctorsPersonnelListSerializer(personnel, many=True)        
+            return Response(serializer.data)
+        elif roster_instance.source == "Nurses":
+            personnel = NursesPersonnel.objects.filter(roster=roster)
+            serializer = NursesPersonnelListSerializer(personnel, many=True)        
+            return Response(serializer.data)
+        elif roster_instance.source == "Staff":
+            personnel = StaffPersonnel.objects.filter(roster=roster)
+            serializer = StaffPersonnelListSerializer(personnel, many=True)        
+            return Response(serializer.data)
+
+class PersonnelDetailView(APIView):
+    def put(self, request, pk, format=None):
+        batch = Batch.objects.get(pk=pk)
+        roster = Roster.objects.get(id=batch.roster)
+
+        if roster.source == "Doctors":
+            serializer = DoctorsPersonnelSerializer(batch, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({ 'message': 'OK', 'data': serializer.data })
+            return Response(serializer.errors)
+        elif roster.source == "Nurses":
+            serializer = NursesPersonnelSerializer(batch, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({ 'message': 'OK', 'data': serializer.data })
+            return Response(serializer.errors)
+        elif roster.source == "Staff":
+            serializer = StaffPersonnelSerializer(batch, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({ 'message': 'OK', 'data': serializer.data })
+            return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        roster = Batch.objects.get(pk=pk)
+        roster.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # -----------------------------------------------------------------------------------------------------------
 # roster sheet
@@ -144,18 +227,66 @@ class RefreshSheetView(APIView):
             for n in range(int((to_date - from_date).days)):
                 yield from_date + timedelta(n)
 
-        # to be used in filling both days and sheet tables
         roster = self.request.query_params.get('roster', None)
+        roster_instance = Roster.objects.get(id=roster)
         
-        from_date = roster.from_date
-        to_date = roster.to_date
-        days = {};
+    	# fill days table        
+        from_date = roster_instance.from_date
+        to_date = roster_instance.to_date
 
-        for day in daterange(from_date, to_date):
-            days.update(day)
+        add_list = []
+        delete_list = []
+        day_set = RosterDay.objects.filter(roster=roster)
 
-        roster_days = RosterDays(days=days)
-        roster_days.roster = roster
-        roster_days.save()    
+        if day_set.exists():
+            for new_day in daterange(from_date, to_date):
+                for day in day_set.iterator():
+                    if (new_day != day) and (new_day > to_date):
+                        add_list.append(RosterDay(roster=roster_instance, day=str(new_day)))
+                    if (new_day != day) and (new_day < from_date):
+                        delete_list.append({roster:roster_instance, day:day})
+
+            if not add_list == []: RosterDay.objects.bulk_create(add_list)
+            if not delete_list == []: RosterDay.objects.filter(roster__in=delete_list[roster], day__in=delete_list[day])
+        else:
+            for new_day in daterange(from_date, to_date):
+                add_list.append(RosterDay(roster=roster_instance, day=str(new_day)))
+            if not add_list == []: RosterDay.objects.bulk_create(add_list)
+
+        # innitiate sheet fields
+        shift_list = []
+        shift_set = Shift.objects.filter(roster=roster)
+        if shift_set.exists():
+            for shift in shift_set.iterator():
+                this_shift = RosterSheet.objects.filter(roster=roster, shift=shift.id)
+                if not this_shift.exists():
+                    shift_list.append(RosterSheet(roster=roster_instance, shift=shift, batches={}))
+            if not shift_list == []: RosterSheet.objects.bulk_create(shift_list)
 
         return Response({ 'message' : 'OK' })
+
+class RosterDayView(APIView):
+    def get(self, request, format=None):
+        roster = self.request.query_params.get('roster', None)
+        day = RosterDay.objects.filter(roster=roster)
+        serializer = RosterDaySerializer(day, many=True)        
+        return Response(serializer.data)
+
+class RosterSheetView(APIView):
+    def get(self, request, format=None):
+        roster = self.request.query_params.get('roster', None)
+        roster_instance = RosterSheet.objects.filter(roster=roster)
+        serializer = RosterSheetSerializer(roster_instance, many=True)        
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        roster_sheet = request.data
+        sheet_list = []
+
+        for x in roster_sheet:
+            sheet = RosterSheet.objects.get(roster=x['roster'], shift=x['shift'])
+            sheet.batches=x['batches']
+            sheet_list.append(sheet)
+
+        RosterSheet.objects.bulk_update(sheet_list, ['batches'])
+        return Response({ 'message': 'OK' })

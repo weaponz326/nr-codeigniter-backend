@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Attendance, AttendanceSheet, AttendanceDays
+from .models import Attendance, AttendanceSheet, AttendanceDay
 from module_students.serializers import StudentListSerializer
 
 
@@ -32,8 +32,8 @@ class AttendanceSheetListSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
 
-class AttendanceDaysSerializer(serializers.ModelSerializer):
+class AttendanceDaySerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = AttendanceDays
+        model = AttendanceDay
         fields = '__all__'

@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from .models import Timetable, TimetablePeriod, TimetableClass
-from .serializers import TimetableSerializer, TimetablePeriodSerializer, TimetableClassSerializer
+from .models import Timetable, TimetablePeriod, TimetableClass, TimetableSheet
+from .serializers import TimetableSerializer, TimetablePeriodSerializer, TimetableClassSerializer, TimetableSheetSerializer
 
 
 # Create your views here.
@@ -44,7 +44,7 @@ class TimetableDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # --------------------------------------------------------------------------------------------------------------
-# timetable grid
+# timetable config
 
 class TimetablePeriodView(APIView):
     def get(self, request, format=None):
@@ -74,3 +74,47 @@ class TimetableClassView(APIView):
             return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
 
+class TimetableClassDetailView(APIView):
+    def get(self, request, pk, format=None):
+        timetable_class = TimetableClass.objects.get(pk=pk)
+        serializer = TimetableClassSerializer(timetable_class)
+        return Response(serializer.data)
+
+# -----------------------------------------------------------------------------------------------------------------------
+# timetable sheet
+
+class RefreshSheetView(APIView):
+    def get(self, request, format=None):
+        timetable = self.request.query_params.get('timetable', None)
+        timetable_instance = Timetable.objects.get(id=timetable)
+        class_set = TimetableClass.objects.filter(timetable=timetable)
+        period_set = TimetablePeriod.objects.filter(timetable=timetable)
+        sheet_set = TimetableSheet.objects.filter(timetable=timetable)
+
+        sheet_list = []
+
+        if class_set.exists():
+            for clas in class_set.iterator():
+                if period_set.exists():
+                    for period in period_set.iterator():
+                        
+                        this_sheet = TimetableSheet.objects.filter(timetable_class=clas.id, timetable_period=period.id)
+                        if not this_sheet.exists():
+                            sheet_list.append(TimetableSheet(timetable=timetable_instance, timetable_class=clas, timetable_period=period, subjects={}))
+
+        if not sheet_list == []: TimetableSheet.objects.bulk_create(sheet_list)
+        return Response({ 'message' : 'OK' })
+
+class FullSheetView(APIView):
+    def get(self, request, format=None):
+        timetable = self.request.query_params.get('timetable', None)
+        sheet = TimetableSheet.objects.filter(timetable=timetable)
+        serializer = TimetableSheetSerializer(sheet, many=True)        
+        return Response(serializer.data)
+
+class ClassSheetView(APIView):
+    def get(self, request, format=None):
+        timetable_class = self.request.query_params.get('timetable_class', None)
+        sheet = TimetableSheet.objects.filter(timetable_class=timetable_class)
+        serializer = TimetableSheetSerializer(sheet, many=True)        
+        return Response(serializer.data)
