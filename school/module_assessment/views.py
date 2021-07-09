@@ -49,10 +49,10 @@ class AssessmentDetailView(APIView):
 
 class RefreshSheetView(APIView):
     def get(self, request, format=None):
-        assessment_id = self.request.query_params.get('assessment', None)
-        assessment = Assessment.objects.get(id=assessment_id)
-        class_id = assessment.clas.id
-        student_set = Student.objects.filter(clas=class_id)
+        assessment = self.request.query_params.get('assessment', None)
+        assessment_instance = Assessment.objects.get(id=assessment)
+        clas = assessment_instance.clas.id
+        student_set = Student.objects.filter(clas=clas)
 
         student_list = []
 
@@ -60,7 +60,7 @@ class RefreshSheetView(APIView):
             for student in student_set.iterator():
                 this_student = AssessmentSheet.objects.filter(student=student.id)
                 if not this_student.exists():
-                    student_list.append(AssessmentSheet(assessment=assessment, student=student))
+                    student_list.append(AssessmentSheet(assessment=assessment_instance, student=student))
             if not student_list == []: AssessmentSheet.objects.bulk_create(student_list)
 
         return Response({ 'message' : 'OK' })

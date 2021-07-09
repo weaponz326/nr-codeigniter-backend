@@ -18,10 +18,10 @@ class Ledger(models.Model):
 class LedgerItem(models.Model):
     ledger = models.ForeignKey(Ledger, on_delete=models.CASCADE)
     item_date = models.DateField(null=True, blank=True)
-    reference = models.CharField(max_length=20, blank=True)
-    details = models.TextField(null=True)
-    item_type = models.CharField(max_length=20, blank=True)
-    amount = models.CharField(max_length=20, blank=True)
+    reference_number = models.CharField(max_length=20, blank=True)
+    description = models.TextField(null=True)
+    credit = models.CharField(max_length=20, blank=True)
+    debit = models.CharField(max_length=20, blank=True)
     balance = models.CharField(max_length=20, blank=True)
 
     def __str__(self):

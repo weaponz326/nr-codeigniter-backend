@@ -5,8 +5,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from .models import Attendance, AttendanceSheet, AttendanceDay
-from .serializers import AttendanceSerializer, AttendanceSheetSerializer, AttendanceSheetListSerializer, AttendanceDaySerializer
+from .models import Attendance, AttendanceEmployee, AttendanceDay, AttendanceCheck
+from .serializers import (
+    AttendanceSerializer,
+    AttendanceEmployeeSerializer, 
+    AttendanceEmployeeListSerializer, 
+    AttendanceDaySerializer,
+    AttendanceCheckSerializer
+)
 from module_employees.models import Employee
 
 
@@ -61,53 +67,80 @@ class RefreshSheetView(APIView):
         
     	# fill days table        
         from_date = attendance_instance.from_date
-        to_date = attendance_instance.to_date
+        to_date = attendance_instance.to_date        
 
-        add_list = []
-        delete_list = []
+        # fill attendance employees
+        employee_set = AttendanceEmployee.objects.filter(attendance=attendance)
+        employee_list = []
+
+        if employee_set.exists():
+            for employee in employee_set.iterator():
+                if not AttendanceEmployee.objects.filter(attendance=attendance, employee=employee.id).exists():
+                    employee_list.append(AttendanceEmployee(attendance=attendance_instance, employee=employee))
+            if not employee_list == []: AttendanceEmployee.objects.bulk_create(employee_list)
+
+        # fill days and checks
+        add_day_list = []
+        delete_day_list = []
+        add_check_list = []        
+        delete_check_list = []        
         day_set = AttendanceDay.objects.filter(attendance=attendance)
-
-        # new_day = day in date range of days between from_date and to_date from attendance model
-        # day = day from attendace_day model 
 
         if day_set.exists():
             for new_day in daterange(from_date, to_date):
                 for day in day_set.iterator():
-                    if (new_day != day) and (new_day > to_date):
-                        add_list.append(AttendanceDay(attendance=attendance_instance, day=new_day))
-                    if (new_day != day) and (new_day < from_date):
-                        delete_list.append({attendance:attendance_instance, day:day})
 
-            if not add_list == []: AttendanceDay.objects.bulk_create(add_list)
-            if not delete_list == []: AttendanceDay.objects.filter(attendance__in=delete_list[attendance], day__in=delete_list[day])
+                    if (new_day != day) and (new_day > to_date):
+                        add_day_list.append(AttendanceDay(attendance=attendance_instance, day=str(new_day)))
+                        if employee_set.exists():
+                            for employee in employee_set.iterator():
+                                add_check_list.append(AttendanceCheck(attendance_employee=employee, day=str(new_day)))
+                    
+                    if (new_day != day) and (new_day < from_date):
+                        delete_day_list.append({'attendance':attendance_instance, 'day':day})
+                        if employee_set.exists():
+                            for employee in employee_set.iterator():
+                                delete_check_list.append({'attendance_employee':employee, 'day':day})
+
+            if not add_day_list == []: AttendanceDay.objects.bulk_create(add_day_list)
+            if not delete_day_list == []: AttendanceDay.objects.filter(attendance__in=delete_day_list[attendance], day__in=delete_day_list[day])
+            if not add_check_list == []: AttendanceCheck.objects.bulk_create(add_check_list)
+            if not delete_check_list == []: AttendanceCheck.objects.filter(attendance_employee__in=delete_check_list[attendance], day__in=delete_day_list[day])
+        
         else:
             for new_day in daterange(from_date, to_date):
-                add_list.append(AttendanceDay(attendance=attendance_instance, day=new_day))
-            if not add_list == []: AttendanceDay.objects.bulk_create(add_list)
+                add_day_list.append(AttendanceDay(attendance=attendance_instance, day=str(new_day)))
+                for employee in employee_set.iterator():
+                    add_check_list.append(AttendanceCheck(attendance_employee=employee, day=str(new_day)))                    
             
-        # fill sheet table
-        employee_set = Employee.objects.filter(account=attendance_instance.account)
-        attendance_sheet_list = []
-
-        if employee_set.exists():
-            for employee in employee_set.iterator():
-                if not AttendanceSheet.objects.filter(attendance=attendance, employee=employee.id).exists():
-                    # TODO: cannot add employee to filter
-                    attendance_sheet_list.append(AttendanceSheet(attendance=attendance_instance, employee=employee, checks={}))                    
-        AttendanceSheet.objects.bulk_create(attendance_sheet_list)
-
+            if not add_day_list == []: AttendanceDay.objects.bulk_create(add_day_list)
+            if not add_check_list == []: AttendanceCheck.objects.bulk_create(add_check_list)
+                    
         return Response({ 'message' : 'OK' })
 
-class AttendanceConfigView(APIView):
+class AttendanceDayView(APIView):
     def get(self, request, format=None):
         attendance = self.request.query_params.get('attendance', None)
         day = AttendanceDay.objects.filter(attendance=attendance)
-        serializer = AttendanceDaySerializer(day, many=True)    
-        return Response({ 'message' : 'OK', 'data' : serializer.data })
+        serializer = AttendanceDaySerializer(day, many=True)        
+        return Response(serializer.data)
 
-class AttendanceSheetView(APIView):
+class AttendanceEmployeeView(APIView):
     def get(self, request, format=None):
         attendance = self.request.query_params.get('attendance', None)
-        sheet = AttendanceSheet.objects.filter(attendance=attendance)
-        serializer = AttendanceSheetListSerializer(sheet)    
-        return Response({ 'message' : 'OK', 'data': serializer.data })
+        day = AttendanceEmployee.objects.filter(attendance=attendance)
+        serializer = AttendanceEmployeeListSerializer(day, many=True)        
+        return Response(serializer.data)
+
+class AttendanceCheckView(APIView):
+    def get(self, request, format=None):
+        attendance = self.request.query_params.get('attendance', None)
+        check = AttendanceCheck.objects.filter(attendance_employee__attendance=attendance)
+        serializer = AttendanceCheckSerializer(check, many=True)        
+        return Response(serializer.data)
+
+class AttendanceCheckDetailView(APIView):
+    def get(self, request, pk, format=None):
+        attendance = AttendanceCheck.objects.get(pk=pk)
+        serializer = AttendanceCheckSerializer(attendance)
+        return Response(serializer.data)

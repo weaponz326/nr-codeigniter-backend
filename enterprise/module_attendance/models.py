@@ -17,11 +17,17 @@ class Attendance(models.Model):
     def __str__(self):
         return str(self.id)
 
-class AttendanceSheet(models.Model):
+class AttendanceEmployee(models.Model):
     attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    checks = models.JSONField();
 
 class AttendanceDay(models.Model):
     attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
     day = models.DateField(null=True, blank=True)
+
+class AttendanceCheck(models.Model):
+    attendance_employee = models.ForeignKey(AttendanceEmployee, on_delete=models.CASCADE)
+    day = models.DateField(null=True, blank=True)
+    check = models.BooleanField(null=True)
+    time_in = models.TimeField(null=True)
+    time_out = models.TimeField(null=True)

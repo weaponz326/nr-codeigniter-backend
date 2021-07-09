@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Appraisal
+from .models import Appraisal, AppraisalForm
 from module_employees.serializers import EmployeeListSerializer
 
 
@@ -10,11 +10,16 @@ class AppraisalSerializer(serializers.ModelSerializer):
         model = Appraisal
         fields = '__all__'
 
-class AppraisalListSerializer(serializers.ModelSerializer):
-    # contains serializer method filed
-    employee = EmployeeListSerializer()
+class AppraisalFormSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Appraisal
+        model = AppraisalForm
         fields = '__all__'
-        depth = 1
+
+class AppraisalFormListSerializer(serializers.ModelSerializer):
+
+    # contains serializer method filed
+    employee = EmployeeListSerializer()
+    class Meta:
+        model = AppraisalForm
+        fields = '__all__'
