@@ -31,7 +31,7 @@ urlpatterns = [
     path('module-accounts/', include('module_accounts.urls')),
     path('module-members/', include('module_members.urls')),
     path('module-committees/', include('module_committees.urls')),
-    # path('module-dues/', include('module_dues.urls')),
+    path('module-dues/', include('module_dues.urls')),
     path('module-executives/', include('module_executives.urls')),
     path('module-action-plan/', include('module_action_plan.urls')),
     path('module-budget/', include('module_budget.urls')),

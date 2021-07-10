@@ -4,8 +4,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from .models import Attendance, AttendanceSheet, AttendanceDay
-from .serializers import AttendanceSerializer, AttendanceSheetSerializer, AttendanceSheetListSerializer, AttendanceDaySerializer
+from .models import Attendance, AttendanceMember, AttendanceDay, AttendanceCheck
+from .serializers import (
+    AttendanceSerializer, 
+    AttendanceMemberSerializer, 
+    AttendanceMemberListSerializer, 
+    AttendanceDaySerializer,
+    AttendanceCheckSerializer
+)
 from module_members.models import Member
 
 
@@ -58,9 +64,9 @@ class RefreshSheetView(APIView):
 
         if member_set.exists():
             for member in member_set.iterator():
-                if not AttendanceSheet.objects.filter(attendance=attendance, member=member.id).exists():
-                    attendance_sheet_list.append(AttendanceSheet(attendance=attendance_instance, member=member, checks={}))                    
-        AttendanceSheet.objects.bulk_create(attendance_sheet_list)
+                if not AttendanceMember.objects.filter(attendance=attendance, member=member.id).exists():
+                    attendance_sheet_list.append(AttendanceMember(attendance=attendance_instance, member=member))                    
+        AttendanceMember.objects.bulk_create(attendance_sheet_list)
 
         return Response({ 'message' : 'OK' })
 
@@ -75,12 +81,34 @@ class AttendanceDayView(APIView):
         serializer = AttendanceDaySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+
+            add_check_list = []        
+            member_set = AttendanceMember.objects.filter(attendance=serializer.data.attendance)
+
+            if member_set.exists():
+                for member in member_set.iterator():
+                    add_check_list.append(AttendanceCheck(attendance_member=member, day=str(serializer.data.day)))                                 
+            if not add_check_list == []: AttendanceCheck.objects.bulk_create(add_check_list)
             return Response({ 'message': 'OK', 'data': serializer.data })
+        
         return Response(serializer.errors)
 
-class AttendanceSheetView(APIView):
+class AttendanceMemberView(APIView):
     def get(self, request, format=None):
         attendance = self.request.query_params.get('attendance', None)
-        sheet = AttendanceSheet.objects.filter(attendance=attendance)
-        serializer = AttendanceSheetListSerializer(sheet, many=True)    
-        return Response({ 'message' : 'OK', 'data': serializer.data })
+        day = AttendanceMember.objects.filter(attendance=attendance)
+        serializer = AttendanceMemberListSerializer(day, many=True)        
+        return Response(serializer.data)
+
+class AttendanceCheckView(APIView):
+    def get(self, request, format=None):
+        attendance = self.request.query_params.get('attendance', None)
+        check = AttendanceCheck.objects.filter(attendance_member__attendance=attendance)
+        serializer = AttendanceCheckSerializer(check, many=True)        
+        return Response(serializer.data)
+
+class AttendanceCheckDetailView(APIView):
+    def get(self, request, pk, format=None):
+        attendance = AttendanceCheck.objects.get(pk=pk)
+        serializer = AttendanceCheckSerializer(attendance)
+        return Response(serializer.data)
