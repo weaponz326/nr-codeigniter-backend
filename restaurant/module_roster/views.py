@@ -206,16 +206,6 @@ class RefreshSheetView(APIView):
                 add_list.append(RosterDay(roster=roster_instance, day=str(new_day)))
             if not add_list == []: RosterDay.objects.bulk_create(add_list)
 
-        # innitiate sheet fields
-        shift_list = []
-        shift_set = Shift.objects.filter(roster=roster)
-        if shift_set.exists():
-            for shift in shift_set.iterator():
-                this_shift = RosterSheet.objects.filter(roster=roster, shift=shift.id)
-                if not this_shift.exists():
-                    shift_list.append(RosterSheet(roster=roster_instance, shift=shift, batches={}))
-            if not shift_list == []: RosterSheet.objects.bulk_create(shift_list)
-
         return Response({ 'message' : 'OK' })
 
 class RosterDayView(APIView):
@@ -225,21 +215,10 @@ class RosterDayView(APIView):
         serializer = RosterDaySerializer(day, many=True)        
         return Response(serializer.data)
 
+# TODO: insert and get sheet batches
 class RosterSheetView(APIView):
     def get(self, request, format=None):
-        roster = self.request.query_params.get('roster', None)
-        roster_instance = RosterSheet.objects.filter(roster=roster)
-        serializer = RosterSheetSerializer(roster_instance, many=True)        
-        return Response(serializer.data)
+        return Response({ 'message' : 'TODO' })
 
     def post(self, request, format=None):
-        roster_sheet = request.data
-        sheet_list = []
-
-        for x in roster_sheet:
-            sheet = RosterSheet.objects.get(roster=x['roster'], shift=x['shift'])
-            sheet.batches=x['batches']
-            sheet_list.append(sheet)
-
-        RosterSheet.objects.bulk_update(sheet_list, ['batches'])
-        return Response({ 'message': 'OK' })
+        return Response({ 'message' : 'TODO' })

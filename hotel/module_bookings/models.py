@@ -15,3 +15,11 @@ class Booking(models.Model):
     
     def __str__(self):
         return str(self.id)
+
+class BookedRoom(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    room_type = models.CharField(max_length=100, blank=True)
+    persons_number = models.CharField(max_length=10, blank=True)
+    
+    def __str__(self):
+        return str(self.id)

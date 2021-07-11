@@ -43,6 +43,15 @@ class ServiceDetailView(APIView):
         service.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class TotalAmountView(APIView):
+    def patch(self, request, pk, format=None):
+        total = Service.objects.get(pk=pk)
+        serializer = ServiceSerializer(total, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
 # ------------------------------------------------------------------------------------------------------------------------
 # service item
 

@@ -46,6 +46,6 @@ class RosterDay(models.Model):
     day = models.DateField(null=True, blank=True)
 
 class RosterSheet(models.Model):
-    roster = models.ForeignKey(Roster, on_delete=models.CASCADE)
-    shift = models.ForeignKey(Shift, on_delete=models.CASCADE)
-    batches = models.JSONField();
+    roster_day = models.ForeignKey(RosterDay, null=True, on_delete=models.CASCADE)
+    shift = models.ForeignKey(Shift, null=True, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, null=True, on_delete=models.CASCADE)

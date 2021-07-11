@@ -29,7 +29,7 @@ class RosterDayAdmin(admin.ModelAdmin):
     list_display = ('id', 'roster')
 
 class RosterSheetAdmin(admin.ModelAdmin):
-    list_display = ('id', 'roster', 'shift')
+    list_display = ('id', 'roster_day', 'shift', 'batch')
 
 admin.site.register(Roster, RosterAdmin)
 admin.site.register(Shift, ShiftAdmin)
