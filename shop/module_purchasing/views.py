@@ -6,7 +6,7 @@ from rest_framework import status
 
 from .models import Purchasing, PurchasingItem
 from accounts.models import Profile
-from .serializers import PurchasingSerializer
+from .serializers import PurchasingSerializer, PurchasingItemSerializer
 
 
 # Create your views here.
@@ -49,8 +49,8 @@ class PurchasingDetailView(APIView):
 
 class PurchasingItemView(APIView):
     def get(self, request, format=None):
-        supplier = self.request.query_params.get('supplier', None)
-        purchasing_item = PurchasingItem.objects.filter(supplier=supplier)
+        purchasing = self.request.query_params.get('purchasing', None)
+        purchasing_item = PurchasingItem.objects.filter(purchasing=purchasing)
         serializer = PurchasingItemSerializer(purchasing_item, many=True)        
         return Response(serializer.data)
 

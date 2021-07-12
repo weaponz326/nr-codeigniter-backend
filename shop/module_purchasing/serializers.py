@@ -16,6 +16,7 @@ class PurchasingSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 1
+            
 class PurchasingItemSerializer(serializers.ModelSerializer):
 
     class Meta:

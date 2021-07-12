@@ -12,8 +12,8 @@ class Payment(models.Model):
     payment_code = models.CharField(max_length=20, blank=True)
     payment_date = models.DateTimeField(null=True, blank=True)
     customer_name = models.CharField(max_length=100, blank=True)
-    amount_paid = models.CharField(max_length=20, blank=True)
-    balance = models.CharField(max_length=20, blank=True)
+    payment = models.CharField(max_length=20, blank=True)
+    
 
     def __str__(self):
         return str(self.id)

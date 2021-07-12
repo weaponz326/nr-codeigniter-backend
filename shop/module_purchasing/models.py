@@ -9,7 +9,7 @@ from module_products.models import Product
 class Purchasing(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, null=True, on_delete=models.CASCADE)
-    purchasing_number = models.CharField(max_length=20, blank=True)
+    purchasing_code = models.CharField(max_length=20, blank=True)
     purchasing_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
@@ -19,7 +19,6 @@ class PurchasingItem(models.Model):
     purchasing = models.ForeignKey(Purchasing, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, null=True, on_delete=models.CASCADE)
     quantity = models.CharField(max_length=20, blank=True)
-    total_price = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
         return str(self.id)

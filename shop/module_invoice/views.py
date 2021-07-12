@@ -32,7 +32,7 @@ class InvoiceDetailView(APIView):
 
     def put(self, request, pk, format=None):
         invoice = Invoice.objects.get(pk=pk)
-        serializer = InvoiceSerializer(invoice, data=request.data)
+        serializer = InvoiceSerializer(invoice, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({ 'message': 'OK', 'data': serializer.data })
@@ -50,7 +50,7 @@ class InvoiceItemView(APIView):
     def get(self, request, format=None):
         invoice = self.request.query_params.get('invoice', None)
         item = InvoiceItem.objects.filter(invoice=invoice)
-        serializer = InvoiceItemSerializer(item, many=True)        
+        serializer = InvoiceItemSerializer(item, many=True, context={'request': request})        
         return Response(serializer.data)
 
     def post(self, request, format=None):
