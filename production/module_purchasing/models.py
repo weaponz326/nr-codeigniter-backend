@@ -17,9 +17,8 @@ class Purchasing(models.Model):
 
 class PurchasingItem(models.Model):
     purchasing = models.ForeignKey(Purchasing, on_delete=models.CASCADE)
-    item = models.CharField(max_length=100, blank=True)
+    item_description = models.CharField(max_length=100, blank=True)
     quantity = models.CharField(max_length=20, blank=True)
-    total_price = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
         return str(self.id)
