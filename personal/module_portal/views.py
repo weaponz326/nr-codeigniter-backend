@@ -8,45 +8,46 @@ from rest_framework import filters
 
 from .models import Rink
 from users.models import Profile
-from module_tasks.models import Task
-from module_calendar.models import Appointment
-from module_notes.models import Note
-from .serializers import RinkSerializer, ProfileSerializer, RinkDetailSerializer
-from module_tasks.serializers import TaskSerializer
-from module_calendar.serializers import AppointmentSerializer
-from module_notes.serializers import NoteSerializer
+from .serializers import RinkSerializer, ProfileSerializer
 
 
 # Create your views here.
 
 
 class RinkView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = RinkSerializer
-        queryset = Rink.objects.all()
+    def get(self, request, format=None):
+        user = self.request.query_params.get('user', None)
+        account = Rink.objects.filter(user=user)
+        serializer = RinkSerializer(account, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = RinkSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = RinkSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            rink = Rink(
-                sender=Profile.objects.get(id=request.data.get("sender")),
-                recipient=Profile.objects.get(id=request.data.get("recipient")),
-                rink_type=request.data.get("rink_type"),
-                rink_source=request.data.get("rink_source"),
-                comment=request.data.get("comment")
-            )
-            rink.save()
-            latest_rink = Rink.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 
-                'status': True ,
-                'rink_id': latest_rink.id
-            })
-        else:
-            return Response({ 'status': False })
+class RinkDetailView(APIView):
+    def get(self, request, pk, format=None):
+        rink = Rink.objects.get(pk=pk)
+        serializer = RinkSerializer(rink)
+        return Response(serializer.data)
 
+    def put(self, request, pk, format=None):
+        rink = Rink.objects.get(pk=pk)
+        serializer = RinkSerializer(rink, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
+
+    def delete(self, request, pk, format=None):
+        rink = Rink.objects.get(pk=pk)
+        rink.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# search for personal users        
 class SearchListView(generics.ListAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
@@ -57,77 +58,14 @@ class SearchDetailView(generics.RetrieveAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
-# rink type sources
-
-class TaskListView(generics.ListAPIView):
-    serializer_class = TaskSerializer
-
-    def get_queryset(self):
-        queryset = Task.objects.all()
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            queryset = queryset.filter(user=user)
-        return queryset
-
-class AppointmentListView(generics.ListAPIView):
-    serializer_class = AppointmentSerializer
-
-    def get_queryset(self):
-        queryset = Appointment.objects.all()
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            queryset = queryset.filter(user=user)
-        return queryset
-
-class NoteListView(generics.ListAPIView):
-    serializer_class = NoteSerializer
-
-    def get_queryset(self):
-        queryset = Note.objects.all()
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            queryset = queryset.filter(user=user)
-        return queryset
-
 # list all rinks of a user
 class RinkListView(generics.ListAPIView):
-    serializer_class = RinkDetailSerializer
+    serializer_class = RinkSerializer
 
     def get_queryset(self):
         queryset = Rink.objects.all()
         user = self.request.query_params.get('user', None)
         if user is not None:
             # queryset = queryset.filter(recipient__id=user).filter(sender__id=user)
-            queryset = queryset.filter(recipient__id=user)
+            queryset = queryset.filter(sender__id=user) | queryset.filter(recipient__id=user)
         return queryset
-
-# get a specific rink
-class RinkDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Rink.objects.all()
-    serializer_class = RinkDetailSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-# get single dource for rink details
-
-class TaskDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-class AppointmentDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-class NoteDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Note.objects.all()
-    serializer_class = NoteSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)

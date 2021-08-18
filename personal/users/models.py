@@ -8,6 +8,8 @@ class Profile(models.Model):
     user = models.ForeignKey(User, related_name='users_profile', on_delete=models.CASCADE, blank=True)
     location = models.CharField(max_length=100)
     about = models.TextField()
+    photo = models.FileField(null=True, upload_to='profile')
+
 
     def __str__(self):
         return self.user.email

@@ -5,9 +5,9 @@ from .models import Note, NoteFile
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        fields = ['id', 'user', 'subject', 'body', 'created_at', 'updated_at']
+        fields = '__all__'
 
 class NoteFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = NoteFile
-        fields = ['note', 'file']
+        fields = '__all__'
