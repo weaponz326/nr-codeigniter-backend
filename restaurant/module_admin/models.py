@@ -8,8 +8,7 @@ class User(models.Model):
     account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     personal_id = models.PositiveIntegerField()
     is_creator = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    is_manager = models.BooleanField(default=False)
+    user_level = models.CharField(null=True, max_length=20)
 
     def __str__(self):
         return str(self.personal_id)
@@ -38,11 +37,12 @@ class Access(models.Model):
     def __str__(self):
         return str(self.id)
 
-class Activity(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    time = models.DateTimeField(auto_now_add=True)
-    activity_module = models.CharField(max_length=20)
-    description = models.CharField(max_length=100)
+class Invitation(models.Model):
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    personal_id = models.PositiveIntegerField()
+    invitation_status = models.CharField(null=True, max_length=30)
+    date_sent = models.DateTimeField(null=True, auto_now=True)
+    date_confirmed = models.DateTimeField(null=True)
 
     def __str__(self):
         return str(self.id)

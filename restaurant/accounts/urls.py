@@ -12,5 +12,11 @@ urlpatterns = [
     path('user-accounts/', views.UserAccountsView.as_view()),
     path('active-account/', views.ActiveAccountView.as_view()),
 
+    # path('profile/', views.ProfileView.as_view()),
+    # path('profile/<int:pk>', views.ProfileDetailView.as_view()),
+
+    path('search/', views.SearchListView.as_view()),
+    path('search/<int:pk>', views.SearchDetailView.as_view()),
+
     path('', include(router.urls)),
 ]

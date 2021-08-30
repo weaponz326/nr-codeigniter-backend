@@ -12,4 +12,7 @@ urlpatterns = [
     # for settings
     path('user/<int:pk>', views.UserDetailView.as_view()),
     path('user-profile/<int:pk>', views.UserProfileDetailView.as_view()),
+
+    path('search/', views.SearchListView.as_view()),
+    path('search/<int:pk>', views.SearchDetailView.as_view()),
 ]

@@ -1,33 +1,18 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Access, Invitation
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['account', 'personal_id', 'is_admin', 'is_manager', 'is_creator']
+        fields = '__all__'
 
 class AccessSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = [
-            'user', 
-            'admin_access', 
-            'bills_access', 
-            'deliveries_access', 
-            'menu_access', 
-            'orders_access', 
-            'payments_access', 
-            'portal_access', 
-            'reservations_access', 
-            'settings_access', 
-            'sittings_access', 
-            'staff_access', 
-            'stock_access', 
-            'tables_access', 
-        ]
+        model = Access
+        fields = '__all__'
 
-class ActivitySerializer(serializers.ModelSerializer):
+class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['user', 'time', 'activity_module', 'description']
+        model = Invitation
+        fields = '__all__'

@@ -3,12 +3,11 @@ from django.contrib.auth.models import User
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, status
 from rest_framework import filters
 
 from .models import Rink
-from users.models import Profile
-from .serializers import RinkSerializer, ProfileSerializer
+from .serializers import RinkSerializer
 
 
 # Create your views here.
@@ -47,17 +46,6 @@ class RinkDetailView(APIView):
         rink.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# search for personal users        
-class SearchListView(generics.ListAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['user__first_name', 'user__last_name']
-    
-class SearchDetailView(generics.RetrieveAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-
 # list all rinks of a user
 class RinkListView(generics.ListAPIView):
     serializer_class = RinkSerializer
@@ -66,6 +54,5 @@ class RinkListView(generics.ListAPIView):
         queryset = Rink.objects.all()
         user = self.request.query_params.get('user', None)
         if user is not None:
-            # queryset = queryset.filter(recipient__id=user).filter(sender__id=user)
             queryset = queryset.filter(sender__id=user) | queryset.filter(recipient__id=user)
         return queryset

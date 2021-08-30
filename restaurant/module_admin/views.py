@@ -1,179 +1,109 @@
 from django.shortcuts import render
+import requests
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
-from .models import User, Access, Activity
-from .serializers import UserSerializer, AccessSerializer, ActivitySerializer
+from .models import User, Access, Invitation
+from .serializers import UserSerializer, AccessSerializer, InvitationSerializer
 
 
 # Create your views here.
 
 # users
-# --------------------------------------------------------------
 
 class UserView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = UserSerializer
-        queryset = User.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        user = User.objects.filter(account=account)
+        serializer = UserSerializer(user, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        view = AccessView.as_view()
+    def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = User(
-                account=Profile.objects.get(id=request.data.get("restaurant_id")),
-                personal_id=request.data.get("personal_id"),
-                is_creator=request.data.get("is_creator"),
-                is_admin=request.data.get("is_admin"),
-                is_manager=request.data.get("is_manager"),
-            )
-            user.save()
-            latest_user = User.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            # call user access
+class UserDetailView(APIView):
+    def get(self, request, pk, format=None):
+        user = User.objects.get(pk=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
-            return view(requset, *args, **kwargs)
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+    def put(self, request, pk, format=None):
+        user = User.objects.get(pk=pk)
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-class UserListView(generics.ListAPIView):
-    serializer_class = UserSerializer
-
-    def get_queryset(self):
-        queryset = User.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
-        return queryset
-
-class UserDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, format=None):
+        user = User.objects.get(pk=pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # access
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 class AccessView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = AccessSerializer
-        queryset = Access.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        access = Access.objects.filter(account=account)
+        serializer = AccessSerializer(access, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = AccessSerializer(data=request.data)
         if serializer.is_valid():
-            access = Access(
-                user=Profile.objects.get(id=request.data.get("user")),
-                admin_access=request.data.get("admin_access"),
-                bills_access=request.data.get("bills_access"),
-                customers_access=request.data.get("customers_access"),
-                deliveries_access=request.data.get("deliveries_access"),
-                menu_access=request.data.get("menu_access"),
-                orders_access=request.data.get("orders_access"),
-                payments_access=request.data.get("payments_access"),
-                portal_access=request.data.get("portal_access"),
-                reservations_access=request.data.get("reservations_access"),
-                settings_access=request.data.get("settings_access"),
-                sittings_access=request.data.get("sittings_access"),
-                staff_access=request.data.get("staff_access"),
-                stock_access=request.data.get("stock_access"),
-                tables_access=request.data.get("tables_access"),
-            )
-            access.id = request.date.get("user_id")
-            access.save()
+            serializer.id = request.data.get(id)
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+class AccessDetailView(APIView):
+    def get(self, request, pk, format=None):
+        access = Access.objects.get(pk=pk)
+        serializer = AccessSerializer(access)
+        return Response(serializer.data)
 
-class AccessListView(generics.ListAPIView):
-    serializer_class = AccessSerializer
-
-    def get_queryset(self):
-        queryset = Access.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(account=restaurant)
-        return queryset
-
-class AccessDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Access.objects.all()
-    serializer_class = AccessSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-# activity
-# --------------------------------------------------------------------
-
-class ActivityView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = ActivitySerializer
-        queryset = Activity.objects.all()
-
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = ActivitySerializer(data=request.data)
+    def put(self, request, pk, format=None):
+        access = Access.objects.get(pk=pk)
+        serializer = AccessSerializer(access, data=request.data)
         if serializer.is_valid():
-            activity = Activity(
-                user=Activity.objects.get(id=request.data.get("user")),
-                time=request.data.get("time"),
-                activity_module=request.data.get("activity_module"),
-                description=request.data.get("description"),
-            )
-            activity.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False, 'errors': serializer.errors })
+    def delete(self, request, pk, format=None):
+        access = Access.objects.get(pk=pk)
+        access.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class UserActivityListView(generics.ListAPIView):
-    serializer_class = ActivitySerializer
+# -------------------------------------------------------------------------------------------------------
 
-    def get_queryset(self):
-        queryset = User.objects.all()
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            queryset = queryset.filter(user=user)
-        return queryset
+class InvitationView(APIView):
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        invitation = Invitation.objects.filter(account=account)
+        serializer = InvitationSerializer(invitation, many=True)        
+        return Response(serializer.data)
 
-class AllActivityListView(generics.ListAPIView):
-    serializer_class = ActivitySerializer
+    def post(self, request, format=None):
+        serializer = InvitationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.id = request.data.get(id)
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-    def get_queryset(self):
-        queryset = User.objects.all()
-        restaurant = self.request.query_params.get('user', None)
-        if restaurant is not None:
-            queryset = queryset.filter(restaurant__restaurant=restaurant)
-        return queryset
+class InvitationDetailView(APIView):
+    def get(self, request, pk, format=None):
+        invitation = Invitation.objects.get(pk=pk)
+        serializer = InvitationSerializer(invitation)
+        # r = requests.get('localhost:8001/' . serializer.data.personal_id)
+        # TODO: join reqest response with serailizer data
+        return Response(serializer.data)

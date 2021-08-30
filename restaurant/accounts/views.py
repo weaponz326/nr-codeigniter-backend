@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework import viewsets
+from rest_framework import viewsets, generics, mixins, status
+from rest_framework import filters
 from rest_framework.views import APIView
-from rest_framework import generics
 
 from .models import Profile
 from .serializers import ProfileSerializer, UserAccountsSerializer
@@ -16,7 +16,43 @@ class ProfileView(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+# class ProfileView(APIView):
+#     def get(self, request, format=None):
+#         account = self.request.query_params.get('account', None)
+#         profile = Profile.objects.filter(account=account)
+#         serializer = ProfileSerializer(profile, many=True)        
+#         return Response(serializer.data)
+
+#     def post(self, request, format=None):
+#         serializer = ProfileSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({ 'message': 'OK', 'data': serializer.data })
+#         return Response(serializer.errors)
+
+# class ProfileDetailView(APIView):
+#     def get(self, request, pk, format=None):
+#         profile = Profile.objects.get(pk=pk)
+#         serializer = ProfileSerializer(profile)
+#         return Response(serializer.data)
+
+#     def put(self, request, pk, format=None):
+#         profile = Profile.objects.get(pk=pk)
+#         serializer = ProfileSerializer(profile, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({ 'message': 'OK', 'data': serializer.data })
+#         return Response(serializer.errors)
+
+#     def delete(self, request, pk, format=None):
+#         profile = Profile.objects.get(pk=pk)
+#         profile.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+
 # creates a new restaurant profile and add creator to personal users
+
+# -----------------------------------------------------------------------------------------------
+
 class NewProfileView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ProfileSerializer(data=request.data)
@@ -33,8 +69,8 @@ class NewProfileView(APIView):
             user = User(
                 personal_id=request.data.get("personal_id"),
                 account=Profile.objects.latest("id"),
+                user_level='Admin',
                 is_creator=True,
-                is_admin=True
             )
             user.save()
 
@@ -88,3 +124,15 @@ class UserAccountsView(generics.ListAPIView):
             queryset = queryset.filter(personal_id=personal_id)
         return queryset
         
+# --------------------------------------------------------------------------------------------------------
+
+# restaurant search
+class SearchListView(generics.ListAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+    
+class SearchDetailView(generics.RetrieveAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer

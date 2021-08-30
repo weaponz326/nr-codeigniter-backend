@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import generics, mixins, status
+from rest_framework import filters
 
 from .models import Profile
 from .serializers import UserSerializer, UserProfileSerializer
@@ -26,7 +27,6 @@ class UserProfileView(APIView):
 
             return Response({ 'message': 'OK', 'data': serializer.data })
         return Response(serializer.errors)
-        
         
 class UserDetailView(APIView):
     def get(self, request, pk, format=None):
@@ -65,3 +65,14 @@ class UserProfileDetailView(APIView):
         user_profile = Profile.objects.get(pk=pk)
         user_profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# user search
+class SearchListView(generics.ListAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = UserProfileSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['user__first_name', 'user__last_name']
+    
+class SearchDetailView(generics.RetrieveAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = UserProfileSerializer

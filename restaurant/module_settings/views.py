@@ -3,89 +3,43 @@ from django.contrib.auth.models import User
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
+from rest_framework import status
 
 from .models import ExtendedProfile
-from accounts.models import Profile
-from .serializers import ProfileSerializer, ExtendedProfileSerializer
+from .serializers import ExtendedProfileSerializer
 
 
-# Create your views here.
+class ExtendedProfileView(APIView):
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        extended_profile = ExtendedProfile.objects.filter(account=account)
+        serializer = ExtendedProfileSerializer(extended_profile, many=True)        
+        return Response(serializer.data)
 
-# retrieve and update basic profile
-
-# profile
-class ProfileDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    generics.GenericAPIView):
-
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-# retrieve extended profile 
-class ExtendedProfileDetailView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    generics.GenericAPIView):
-
-    queryset = ExtendedProfile.objects.all()
-    serializer_class = ExtendedProfileSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-
-# update profile
-class ProfileView(generics.UpdateAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-
-# create or update extended profile
-# update happens according to either location, or contact profile
-
-class LocationExtendedView(APIView):
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         serializer = ExtendedProfileSerializer(data=request.data)
         if serializer.is_valid():
-            location_details = ExtendedProfile(
-                profile=Profile.objects.get(id=request.data.get("profile")),
-                country=request.data.get("country"),
-                state=request.data.get("state"),
-                city=request.data.get("city"),
-            )
-            location_details.id = request.data.get("profile")
-            location_details.save()
+            id = request.data.get("account")
+            serializer.id=id
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False })
+class ExtendedProfileDetailView(APIView):
+    def get(self, request, pk, format=None):
+        extended_profile = ExtendedProfile.objects.get(pk=pk)
+        serializer = ExtendedProfileSerializer(extended_profile)
+        return Response(serializer.data)
 
-class ContactExtendedView(APIView):
-
-    def post(self, request, *args, **kwargs):
-        serializer = ContactProfileSerializer(data=request.data)
+    def put(self, request, pk, format=None):
+        extended_profile = ExtendedProfile.objects.get(pk=pk)
+        serializer = ExtendedProfileSerializer(extended_profile, data=request.data)
         if serializer.is_valid():
-            contact_details = ExtendedProfile(
-                profile=Profile.objects.get(id=request.data.get("profile")),
-                phone1=request.data.get("phone1"),
-                phone2=request.data.get("phone2"),
-                email=request.data.get("email"),
-                address=request.data.get("address"),
-            )
-            contact_details.id = request.data.get("profile")
-            contact_details.save()
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 'status': True })
-        else:
-            return Response({ 'status': False })
+    def delete(self, request, pk, format=None):
+        extended_profile = ExtendedProfile.objects.get(pk=pk)
+        extended_profile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

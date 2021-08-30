@@ -6,18 +6,12 @@ from accounts.models import Profile
 class RinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rink
-        fields = ['id', 'sender', 'recipient', 'rink_date', 'rink_type', 'rink_source', 'comment']
+        fields = '__all__'
 
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['id', 'name', 'location', 'about']
-
-# gets all rinks with user profile merged to sender and recipient fields
-class RinkDetailSerializer(serializers.ModelSerializer):
-    sender = ProfileSerializer()
-    recipient = ProfileSerializer()
-
-    class Meta:
-        model = Rink
-        fields = ['id', 'sender', 'recipient', 'rink_date', 'rink_type', 'rink_source', 'comment']
+    def __init__(self, *args, **kwargs):
+        super(RinkSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and (request.method == 'POST' or request.method == 'PUT'):
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 1

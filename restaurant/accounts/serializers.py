@@ -6,9 +6,9 @@ from module_admin.models import User
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'name', 'location', 'about']
+        fields = '__all__'
 
-# merge admin module user with hospital profiles
+# merge admin module user with restaurant profiles
 class UserAccountsSerializer(serializers.ModelSerializer):
     account = ProfileSerializer()
 

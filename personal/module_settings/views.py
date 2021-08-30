@@ -20,7 +20,7 @@ class ExtendedProfileView(APIView):
     def post(self, request, format=None):
         serializer = ExtendedProfileSerializer(data=request.data)
         if serializer.is_valid():
-            id=request.data.get("id")
+            id = request.data.get("id")
             serializer.id=id
             serializer.save()
             return Response({ 'message': 'OK', 'data': serializer.data })

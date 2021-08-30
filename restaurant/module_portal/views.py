@@ -2,131 +2,54 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
-from rest_framework import filters
+from rest_framework import generics, mixins, status
 
 from .models import Rink
-from accounts.models import Profile
-from module_staff.models import Staff
-from module_customers.models import Customer
-from module_menu.models import MenuItem
-from .serializers import RinkSerializer, ProfileSerializer, RinkDetailSerializer
-from module_staff.serializers import StaffSerializer
-from module_customers.serializers import CustomerSerializer
-from module_menu.serializers import MenuItemSerializer
+from .serializers import RinkSerializer
 
 
 # Create your views here.
 
 class RinkView(APIView):
-    def get(self, request, *args, **kwargs):
-        serializer = RinkSerializer
-        queryset = Rink.objects.all()
+    def get(self, request, format=None):
+        account = self.request.query_params.get('account', None)
+        account = Rink.objects.filter(account=account)
+        serializer = RinkSerializer(account, many=True)        
+        return Response(serializer.data)
 
-        return Response(queryset)
-
-    def post(self, request, *args, **kwargs):
-        serializer = RinkSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = RinkSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            rink = Rink(
-                sender=Profile.objects.get(id=request.data.get("sender")),
-                recipient=Profile.objects.get(id=request.data.get("recipient")),
-                rink_type=request.data.get("rink_type"),
-                rink_source=request.data.get("rink_source"),
-                comment=request.data.get("comment")
-            )
-            rink.save()
-            latest_rink = Rink.objects.latest("id")
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-            return Response({ 
-                'status': True ,
-                'rink_id': latest_rink.id
-            })
-        else:
-            return Response({ 'status': False })
+class RinkDetailView(APIView):
+    def get(self, request, pk, format=None):
+        rink = Rink.objects.get(pk=pk)
+        serializer = RinkSerializer(rink)
+        return Response(serializer.data)
 
-class SearchListView(generics.ListAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name']
-    
-class SearchDetailView(generics.RetrieveAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+    def put(self, request, pk, format=None):
+        rink = Rink.objects.get(pk=pk)
+        serializer = RinkSerializer(rink, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'message': 'OK', 'data': serializer.data })
+        return Response(serializer.errors)
 
-# rink type sources
+    def delete(self, request, pk, format=None):
+        rink = Rink.objects.get(pk=pk)
+        rink.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class StaffListView(generics.ListAPIView):
-    serializer_class = StaffSerializer
-
-    def get_queryset(self):
-        queryset = Staff.objects.all()
-        restaurant = self.request.query_params.get('restaurant', None)
-        if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
-        return queryset
-
-class CustomerListView(generics.ListAPIView):
-    serializer_class = CustomerSerializer
-
-    def get_queryset(self):
-        queryset = Customer.objects.all()
-        restaurant = self.request.query_params.get('restaurant', None)
-        if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
-        return queryset
-
-class MenuListView(generics.ListAPIView):
-    serializer_class = MenuItemSerializer
-
-    def get_queryset(self):
-        queryset = MenuItem.objects.all()
-        restaurant = self.request.query_params.get('restaurant', None)
-        if restaurant is not None:
-            queryset = queryset.filter(restaurant=restaurant)
-        return queryset
-
-# list all rinks of a user
+# list all rinks of a account
 class RinkListView(generics.ListAPIView):
-    serializer_class = RinkDetailSerializer
+    serializer_class = RinkSerializer
 
     def get_queryset(self):
         queryset = Rink.objects.all()
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            # queryset = queryset.filter(recipient__id=user).filter(sender__id=user)
-            queryset = queryset.filter(recipient__id=user)
+        account = self.request.query_params.get('account', None)
+        if account is not None:
+            queryset = queryset.filter(sender__id=account) | queryset.filter(recipient__id=account)
         return queryset
-
-# get a specific rink
-class RinkDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Rink.objects.all()
-    serializer_class = RinkDetailSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-# get single dource for rink details
-
-class StaffDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Staff.objects.all()
-    serializer_class = StaffSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-class CustomerDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-class MenuDetailView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = MenuItem.objects.all()
-    serializer_class = MenuItemSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-

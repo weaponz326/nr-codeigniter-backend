@@ -5,24 +5,8 @@ from .models import ExtendedProfile
 from accounts.models import Profile
 
 
-# merged profile and user
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['id', 'name', 'location', 'about']
-
 class ExtendedProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtendedProfile
-        fields = [
-            'id', 
-            'profile', 
-            'country', 
-            'state', 
-            'city', 
-            'phone1', 
-            'phone2', 
-            'email', 
-            'address'
-        ]
-
+        fields = '__all__'
+        
