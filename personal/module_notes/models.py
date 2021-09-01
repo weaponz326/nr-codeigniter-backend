@@ -16,7 +16,7 @@ class Note(models.Model):
 
 class NoteFile(models.Model):
     note = models.ForeignKey(Note, on_delete=models.CASCADE)
-    file = models.FileField(blank=False, null=False)
+    file = models.FileField(blank=False, null=False, upload_to='notes')
 
     def __str__(self):
-        return self.file.name
+        return str(self.id)
