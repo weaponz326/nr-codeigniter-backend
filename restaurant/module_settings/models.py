@@ -17,3 +17,12 @@ class ExtendedProfile(models.Model):
 
     def __str__(self):
         return self.id
+
+class Subscription(models.Model):
+    profile = models.ForeignKey(Profile, blank=True, on_delete=models.CASCADE)
+    subscription = models.CharField(max_length=20, blank=True, default="Individual")
+    plan = models.CharField(max_length=20, blank=True, default="Yearly")
+
+    def __str__(self):
+        return self.id
+

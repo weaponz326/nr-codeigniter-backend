@@ -1,8 +1,6 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import ExtendedProfile
-from accounts.models import Profile
+from .models import ExtendedProfile, Subscription
 
 
 class ExtendedProfileSerializer(serializers.ModelSerializer):
@@ -10,3 +8,8 @@ class ExtendedProfileSerializer(serializers.ModelSerializer):
         model = ExtendedProfile
         fields = '__all__'
         
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+                
